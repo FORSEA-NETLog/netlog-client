@@ -7,6 +7,7 @@ import checkIcon from '../assets/check_icon.png'
 import logo from '../assets/logo_small.png'
 import camera from '../assets/cam.png'
 import camera1 from '../assets/cam1.png'
+import toggle from '../assets/toggle.png'
 
 export default function CheckerPage() {
   const navigate = useNavigate()
@@ -35,6 +36,7 @@ export default function CheckerPage() {
   const [showVesselFilter, setShowVesselFilter] = useState(false)
   const [showDateFilter, setShowDateFilter] = useState(false)
   const [tempDateRange, setTempDateRange] = useState([null, null])
+  const [expandedRecords, setExpandedRecords] = useState(new Set())
 
   const isReady = vesselConfirmed && image && bagCount > 0
 
@@ -371,15 +373,62 @@ export default function CheckerPage() {
                 <div key={date}>
                   <p className="text-gray-400 text-xs mb-2">{date}</p>
                   <div className="flex flex-col gap-2">
-                    {items.map(item => (
-                      <div key={item.record_id} className="bg-white rounded-2xl px-5 py-4 shadow-sm flex justify-between items-center">
+                  {items.map(item => (
+                    <div key={item.record_id} className="bg-white rounded-2xl shadow-sm overflow-hidden">
+                      {/* 헤더 행 */}
+                      <div
+                        className="px-5 py-4 flex justify-between items-center cursor-pointer"
+                        onClick={() => {
+                          setExpandedRecords(prev => {
+                            const next = new Set(prev)
+                            if (next.has(item.record_id)) {
+                              next.delete(item.record_id)
+                            } else {
+                              next.add(item.record_id)
+                            }
+                            return next
+                          })
+                        }}
+                      >
                         <span className="font-semibold text-gray-900">{item.vessel_name}</span>
-                        <div className="flex items-center gap-1">
+                        <div className="flex items-center gap-2">
                           <span className="text-blue-500 font-semibold text-sm">{item.bag_count}자루</span>
-                          <span className="text-gray-300 text-sm">›</span>
+                          <span className="text-gray-400 text-sm">
+                          <img
+                            src={toggle}
+                            alt=""
+                            className={`w-5 h-5 object-contain transition-transform duration-100 ${
+                              expandedRecords.has(item.record_id) ? "rotate-180" : "rotate-0"
+                            }`}
+                          />
+                          </span>
                         </div>
                       </div>
-                    ))}
+
+                      {/* 펼쳐지는 내용 */}
+                      {expandedRecords.has(item.record_id) && (
+                        <div className="px-5 pb-5 flex flex-col gap-3 border-t border-gray-50">
+                          <p className="text-gray-400 text-sm mt-3">
+                            {new Date(item.inspected_at).toLocaleString('ko-KR', {
+                              year: 'numeric',
+                              month: '2-digit',
+                              day: '2-digit',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })}
+                          </p>
+                          {item.bag_image_url && (
+                            <img
+                              src={item.bag_image_url}
+                              alt="마대 사진"
+                              className="w-full rounded-xl object-cover"
+                              style={{ maxHeight: '240px' }}
+                            />
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  ))}
                   </div>
                 </div>
               ))
@@ -440,6 +489,7 @@ export default function CheckerPage() {
               value={tempDateRange[0] ? tempDateRange : null}
               selectRange={true}
               locale="ko-KR"
+              formatDay={(locale, date) => date.getDate()}
               prev2Label={null}
               next2Label={null}
               prevLabel="‹"
