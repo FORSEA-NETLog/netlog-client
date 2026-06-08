@@ -24,7 +24,7 @@ export default function LoginPage() {
         pin: pin
       })
       const { access_token, site_id, site_name } = res.data.data
-      localStorage.setItem('access_token', access_token)
+      localStorage.setItem('checker_token', access_token)
       localStorage.setItem('site_id', site_id)
       localStorage.setItem('site_name', site_name)
       localStorage.setItem('site_code', siteCode)
@@ -82,6 +82,7 @@ export default function LoginPage() {
             onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
           />
         </div>
+
 
         {/* 에러 메시지 */}
         {error && (
