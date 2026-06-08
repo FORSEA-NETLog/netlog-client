@@ -41,7 +41,7 @@ export default function CheckerPage() {
   const [expandedRecords, setExpandedRecords] = useState(new Set())
 
   // 엑셀 추출
-  const [exporting, setExporting] = useState(false)
+  // const [exporting, setExporting] = useState(false)
 
   const isReady = vesselConfirmed && image && bagCount > 0
 
@@ -88,7 +88,7 @@ export default function CheckerPage() {
 
   const handleLogout = () => {
     localStorage.clear()
-    navigate('/checker/login')  // 랜딩 페이지 대신 검수자 로그인으로
+    navigate('/checker/login')  // 랜딩 페이지 대신 검수자 로그인이 나을 듯
   }
 
   const handleImageChange = (e) => {
@@ -126,7 +126,6 @@ export default function CheckerPage() {
       alert('날짜 필터를 먼저 설정해주세요')
       return
     }
-    setExporting(true)
     try {
       const start = dateRange[0].toISOString().split('T')[0]
       const end = dateRange[1].toISOString().split('T')[0]
@@ -144,9 +143,7 @@ export default function CheckerPage() {
       URL.revokeObjectURL(url)
     } catch {
       alert('다운로드에 실패했습니다')
-    } finally {
-      setExporting(false)
-    }
+    } 
   }
 
   const groupByDate = (items) => {

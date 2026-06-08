@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axiosInstance from '../api/axiosInstance'
-import logo from '../assets/logo.png'
+import logo from '../assets/logo.svg'
 
 export default function DashboardLoginPage() {
   const navigate = useNavigate()
