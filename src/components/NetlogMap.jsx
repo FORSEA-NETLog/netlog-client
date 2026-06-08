@@ -13,9 +13,6 @@ export default function NetlogMap() {
     const minrakPanel = minrakRef.current
     const summaryPanel = summaryRef.current
 
-    // ==========================================
-    // 블렌더 세팅값
-    // ==========================================
     const TARGET_ASPECT = 1170 / 2532
     const BLENDER_ORTHO_SCALE = 1.510
 
@@ -29,12 +26,12 @@ export default function NetlogMap() {
     let mixer
     let shipAction, storageAction, cube43Action, yoAction
     let armature001Action, armature002Action, armature003Action, armature004Action
+    let facAction
+    let facTimeout = null
+    let isFacPlaying = false
     let isYoForward = true
     let isColorToggled = false
 
-    // ==========================================
-    // UI 패널 이벤트
-    // ==========================================
     let uiTimeout = null
     let summaryTimeout = null
 
@@ -54,9 +51,7 @@ export default function NetlogMap() {
               yoAction.play()
               isYoForward = true
             }
-            if (cube43Action && !cube43Action.isRunning()) {
-              cube43Action.reset().play()
-            }
+            if (cube43Action && !cube43Action.isRunning()) cube43Action.reset().play()
             isColorToggled = false
           }
         }
@@ -65,9 +60,6 @@ export default function NetlogMap() {
       })
     })
 
-    // ==========================================
-    // 머티리얼 색상
-    // ==========================================
     const emissionColors = [
       { name: 'sea',      mat: null, base: new THREE.Color('#57B5C5'), target: new THREE.Color('#000000') },
       { name: 'blue',     mat: null, base: new THREE.Color('#417DDA'), target: new THREE.Color('#317238') },
@@ -92,9 +84,6 @@ export default function NetlogMap() {
       }
     }
 
-    // ==========================================
-    // 줌 & 패닝
-    // ==========================================
     const raycaster = new THREE.Raycaster()
     const pointer = new THREE.Vector2()
     let clickStartPos = { x: 0, y: 0 }
@@ -136,24 +125,23 @@ export default function NetlogMap() {
       updateCameraView()
     }
 
-    // ==========================================
-    // 클릭 감지
-    // ==========================================
     function checkIntersection(clientX, clientY) {
       if (!camera || !mixer) return
+      if (isFacPlaying) return
+
       pointer.x =  (clientX / window.innerWidth)  * 2 - 1
       pointer.y = -(clientY / window.innerHeight) * 2 + 1
       raycaster.setFromCamera(pointer, camera)
       const intersects = raycaster.intersectObjects(scene.children, true)
 
       if (intersects.length > 0) {
-        const shipTargets    = ['Cylinder025', 'Cylinder025_1']
+        const shipTargets    = ['Cylinder025', 'Cylinder025_1', 'Cylinder_025', 'Cylinder_025_1']
         const storageTargets = ['storage001', 'Cube004', 'storage_2']
         const cubeTargets    = ['Cube011_3']
         const arm001Targets  = ['storage003', 'Cube008_1', 'Cube008']
         const arm002Targets  = ['Cube039_1', 'Cube039_2', 'Cube039']
         const arm003Targets  = ['Cube041_2', 'storage007', 'Cube041_1']
-        const arm004Targets  = ['Cube043_1', 'Cube043_3']
+        const arm004Targets  = ['Cube043_1', 'Cube043_3', 'Cube043_2']
 
         const hit = intersects.find(i =>
           [...shipTargets, ...storageTargets, ...cubeTargets,
@@ -196,14 +184,18 @@ export default function NetlogMap() {
             uiTimeout = setTimeout(() => minrakPanel?.classList.remove('hidden'), 1200)
           } else if (arm004Targets.includes(hit.object.name)) {
             armature004Action?.reset().play()
+            if (facAction) {
+              if (facTimeout) clearTimeout(facTimeout)
+              facTimeout = setTimeout(() => {
+                isFacPlaying = true
+                facAction.reset().play()
+              }, 1000)
+            }
           }
         }
       }
     }
 
-    // ==========================================
-    // 이벤트 리스너
-    // ==========================================
     let isDragging = false
     let previousPointer = { x: 0, y: 0 }
     let previousPinchDistance = null
@@ -289,11 +281,8 @@ export default function NetlogMap() {
     window.addEventListener('touchend', onTouchEnd, { passive: false })
     window.addEventListener('resize', calculateBaseBounds)
 
-    // ==========================================
-    // 모델 로드
-    // ==========================================
     const loader = new GLTFLoader()
-    loader.load('/models/netlog_nla_netspa_2.glb', (gltf) => {
+    loader.load('/models/netlog_nla_netspa_fac.glb', (gltf) => {
       scene.add(gltf.scene)
 
       gltf.scene.traverse((child) => {
@@ -321,6 +310,9 @@ export default function NetlogMap() {
         if (e.action === yoAction && yoAction.timeScale > 0) {
           summaryTimeout = setTimeout(() => summaryPanel?.classList.remove('hidden'), 150)
         }
+        if (e.action === facAction) {
+          isFacPlaying = false
+        }
       })
 
       const BLENDER_FPS = 24
@@ -337,22 +329,20 @@ export default function NetlogMap() {
         return action
       }
 
-      shipAction      = loadClip('Empty.002Action', ['ship', 1, 130])
-      storageAction   = loadClip('ArmatureAction')
-      cube43Action    = loadClip('Cube.043Action')
-      yoAction        = loadClip('yo')
+      shipAction        = loadClip('Empty.002Action', ['ship', 1, 130])
+      storageAction     = loadClip('ArmatureAction')
+      cube43Action      = loadClip('Cube.043Action')
+      yoAction          = loadClip('yo')
       armature002Action = loadClip('ArmatureAction.002')
       armature001Action = loadClip('ArmatureAction.001')
       armature003Action = loadClip('ArmatureAction.003')
       armature004Action = loadClip('ArmatureAction.004')
+      facAction         = loadClip('fac')
 
       camera.updateMatrixWorld()
       calculateBaseBounds()
     })
 
-    // ==========================================
-    // 렌더링 루프
-    // ==========================================
     let animFrameId
     function animate() {
       animFrameId = requestAnimationFrame(animate)
@@ -371,11 +361,9 @@ export default function NetlogMap() {
     }
     animate()
 
-    // ==========================================
-    // cleanup
-    // ==========================================
     return () => {
       cancelAnimationFrame(animFrameId)
+      if (facTimeout) clearTimeout(facTimeout)
       window.removeEventListener('mousedown', onMouseDown)
       window.removeEventListener('mousemove', onMouseMove)
       window.removeEventListener('mouseup', onMouseUp)
