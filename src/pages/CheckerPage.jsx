@@ -8,6 +8,8 @@ import logo from '../assets/logo_small.png'
 import camera from '../assets/cam.png'
 import camera1 from '../assets/cam1.png'
 import toggle from '../assets/toggle.png'
+import extract_button from '../assets/extract_button.png'
+import no_file from '../assets/no_file.png'
 
 export default function CheckerPage() {
   const navigate = useNavigate()
@@ -37,6 +39,9 @@ export default function CheckerPage() {
   const [showDateFilter, setShowDateFilter] = useState(false)
   const [tempDateRange, setTempDateRange] = useState([null, null])
   const [expandedRecords, setExpandedRecords] = useState(new Set())
+
+  // 엑셀 추출
+  const [exporting, setExporting] = useState(false)
 
   const isReady = vesselConfirmed && image && bagCount > 0
 
@@ -113,6 +118,34 @@ export default function CheckerPage() {
       setError('제출에 실패했습니다. 다시 시도해주세요')
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleExport = async () => {
+    if (!dateRange[0] || !dateRange[1]) {
+      alert('날짜 필터를 먼저 설정해주세요')
+      return
+    }
+    setExporting(true)
+    try {
+      const start = dateRange[0].toISOString().split('T')[0]
+      const end = dateRange[1].toISOString().split('T')[0]
+      const params = { start_date: start, end_date: end }
+      if (selectedVessels.length > 0) params.vessel_ids = selectedVessels.join(',')  // ← 추가
+      const res = await axiosInstance.get('/inspection/export', {
+        params,
+        responseType: 'blob'
+      })
+      const url = URL.createObjectURL(new Blob([res.data]))
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `검수기록_${siteName}_${start}_${end}.xlsx`
+      a.click()
+      URL.revokeObjectURL(url)
+    } catch {
+      alert('다운로드에 실패했습니다')
+    } finally {
+      setExporting(false)
     }
   }
 
@@ -319,21 +352,21 @@ export default function CheckerPage() {
             <div className="bg-white px-5 py-4 border-b border-gray-100">
               <div className="grid grid-cols-3 divide-x divide-gray-100">
                 <div className="flex flex-col items-start py-1 pr-4">
-                  <span className="text-gray-400 text-xs mb-1">총 자루</span>
+                  <span className="text-[#4A5568] text-xs mb-1">총 자루</span>
                   <div className="flex items-baseline gap-1">
                     <span className="text-2xl font-bold text-gray-900">{stats.total_bag_count}</span>
-                    <span className="text-gray-400 text-xs">자루</span>
+                    <span className="text-[#4A5568] text-xs">자루</span>
                   </div>
                 </div>
                 <div className="flex flex-col items-start py-1 px-4">
-                  <span className="text-gray-400 text-xs mb-1">수거 선박</span>
+                  <span className="text-[#4A5568] text-xs mb-1">수거 선박</span>
                   <div className="flex items-baseline gap-1">
                     <span className="text-2xl font-bold text-gray-900">{stats.vessel_count}</span>
-                    <span className="text-gray-400 text-xs">척</span>
+                    <span className="text-[#4A5568] text-xs">척</span>
                   </div>
                 </div>
                 <div className="flex flex-col items-start py-1 pl-4">
-                  <span className="text-gray-400 text-xs mb-1">최근 수거일</span>
+                  <span className="text-[#4A5568] text-xs mb-1">최근 수거일</span>
                   <span className="text-2xl font-bold text-gray-900">{stats.last_inspected_at}</span>
                 </div>
               </div>
@@ -360,10 +393,18 @@ export default function CheckerPage() {
               <span className="text-gray-400 text-[10px]">▾</span>
             </button>
 
-            {/* 필터 초기화 */}
-            {hasFilter && (
-              <button className="ml-auto text-gray-400 text-lg" onClick={clearFilters}>✕</button>
-            )}
+            {/* 오른쪽: 초기화 + 추출 */}
+            <div className="ml-auto flex items-center gap-2">
+              {hasFilter && (
+                <button className="text-gray-400 text-sm" onClick={clearFilters}>✕</button>
+              )}
+              <button
+                className="flex items-center gap-1 px-3 py-1.5 rounded-full text-xs border border-blue-200 bg-[#0055FF] text-white font-medium"
+                onClick={handleExport}
+              >
+                <img src={extract_button} alt="" className="w-5 h-5 object-contain" /> 추출
+              </button>
+            </div>
           </div>
 
           {/* 목록 */}
@@ -390,9 +431,9 @@ export default function CheckerPage() {
                           })
                         }}
                       >
-                        <span className="font-semibold text-gray-900">{item.vessel_name}</span>
+                        <span className="font-semibold text-[#0D1526] text-lg">{item.vessel_name}</span>
                         <div className="flex items-center gap-2">
-                          <span className="text-blue-500 font-semibold text-sm">{item.bag_count}자루</span>
+                          <span className="text-blue-500 font-semibold text-lg">{item.bag_count}자루</span>
                           <span className="text-gray-400 text-sm">
                           <img
                             src={toggle}
@@ -434,8 +475,8 @@ export default function CheckerPage() {
               ))
             ) : (
               <div className="flex flex-col items-center justify-center mt-24 gap-3">
-                <span className="text-5xl opacity-30">🎣</span>
-                <p className="text-gray-400 text-sm">조건에 맞는 수거 내역이 없습니다.</p>
+                <span className="text-5xl"><img src={no_file} alt="" className="w-10 h-10 object-contain" /></span>
+                <p className="text-[#8A96B0] text-base">조건에 맞는 수거 내역이 없습니다.</p>
               </div>
             )}
           </div>

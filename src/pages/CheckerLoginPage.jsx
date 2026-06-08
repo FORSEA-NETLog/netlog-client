@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import axiosInstance from '../api/axiosInstance'
 import logo from '../assets/logo.png'
 
-export default function LoginPage() {
+export default function CheckerLoginPage() {
   const navigate = useNavigate()
   const [siteCode, setSiteCode] = useState('')
   const [pin, setPin] = useState('')
