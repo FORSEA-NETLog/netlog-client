@@ -88,7 +88,7 @@ export default function CheckerPage() {
 
   const handleLogout = () => {
     localStorage.clear()
-    navigate('/')
+    navigate('/checker/login')  // 랜딩 페이지 대신 검수자 로그인으로
   }
 
   const handleImageChange = (e) => {
@@ -113,7 +113,7 @@ export default function CheckerPage() {
       const res = await axiosInstance.post('/inspection/record', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       })
-      navigate('/complete', { state: { result: res.data.data, siteName } })
+      navigate('/checker/complete', { state: { result: res.data.data, siteName } })
     } catch {
       setError('제출에 실패했습니다. 다시 시도해주세요')
     } finally {
