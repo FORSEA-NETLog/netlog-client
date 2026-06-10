@@ -27,6 +27,7 @@ export default function NetlogMap() {
     let shipAction, storageAction, cube43Action, yoAction
     let armature001Action, armature002Action, armature003Action, armature004Action
     let facAction
+    let textAction
     let facTimeout = null
     let isFacPlaying = false
     let isYoForward = true
@@ -189,6 +190,7 @@ export default function NetlogMap() {
               facTimeout = setTimeout(() => {
                 isFacPlaying = true
                 facAction.reset().play()
+                if (textAction) textAction.reset().play()  // ← 추가
               }, 1000)
             }
           }
@@ -282,7 +284,7 @@ export default function NetlogMap() {
     window.addEventListener('resize', calculateBaseBounds)
 
     const loader = new GLTFLoader()
-    loader.load('/models/netlog_nla_netspa_fac.glb', (gltf) => {
+    loader.load('/models/netlog_nla_netspa_text.glb', (gltf) => {
       scene.add(gltf.scene)
 
       gltf.scene.traverse((child) => {
@@ -338,6 +340,7 @@ export default function NetlogMap() {
       armature003Action = loadClip('ArmatureAction.003')
       armature004Action = loadClip('ArmatureAction.004')
       facAction         = loadClip('fac')
+      textAction        = loadClip('text')  // 추가
 
       camera.updateMatrixWorld()
       calculateBaseBounds()
