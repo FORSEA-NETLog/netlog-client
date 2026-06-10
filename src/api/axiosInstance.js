@@ -7,9 +7,12 @@ const axiosInstance = axios.create({
   },
 })
 
-// 요청할 때마다 토큰 자동으로 붙여주는 설정
 axiosInstance.interceptors.request.use((config) => {
-  const token = localStorage.getItem('checker_token') //검수자용
+  // 대시보드 API면 admin_token, 아니면 checker_token
+  const isAdmin = config.url?.startsWith('/dashboard')
+  const token = isAdmin
+    ? localStorage.getItem('admin_token')
+    : localStorage.getItem('checker_token')
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
   }
