@@ -238,7 +238,7 @@ export default function CheckerPage() {
                   onChange={(e) => { setVesselName(e.target.value); setVesselConfirmed(false) }}
                 />
                 <button
-                  className={`px-4 py-3 text-sm font-semibold rounded-r-xl ${vesselConfirmed ? 'bg-gray-300 text-gray-500' : 'bg-[#D1FCDC] text-[#2B9F48]'}`}
+                  className={`px-4 py-3 text-sm font-semibold rounded-r-xl shrink-0 whitespace-nowrap ${vesselConfirmed ? 'bg-gray-300 text-gray-500' : 'bg-[#D1FCDC] text-[#2B9F48]'}`}
                   onClick={() => { if (vesselName) setVesselConfirmed(!vesselConfirmed) }}
                 >
                   {vesselConfirmed ? '수정' : '확인'}
