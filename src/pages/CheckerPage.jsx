@@ -230,15 +230,15 @@ export default function CheckerPage() {
                   <span className="text-green-500 text-sm font-medium bg-green-50 px-2 py-0.5 rounded-full">✓ 완료</span>
                 )}
               </div>
-              <div className="flex rounded-xl bg-gray-100">
+              <div className="flex h-13 rounded-xl bg-gray-100 overflow-hidden">
                 <input
-                  className="flex-1 px-4 py-3 bg-gray-100 text-gray-800 outline-none text-base placeholder:text-gray-400 rounded-l-xl"
+                  className="flex-1 min-w-0 px-4 bg-gray-100 text-gray-800 outline-none text-base placeholder:text-gray-400"
                   placeholder="선박명을 입력해주세요."
                   value={vesselName}
                   onChange={(e) => { setVesselName(e.target.value); setVesselConfirmed(false) }}
                 />
                 <button
-                  className={`px-4 py-3 text-sm font-semibold rounded-r-xl shrink-0 whitespace-nowrap ${vesselConfirmed ? 'bg-gray-300 text-gray-500' : 'bg-[#D1FCDC] text-[#2B9F48]'}`}
+                  className={`shrink-0 px-5 text-sm font-semibold ${vesselConfirmed ? 'bg-gray-300 text-gray-500' : 'bg-[#D1FCDC] text-[#2B9F48]'}`}
                   onClick={() => { if (vesselName) setVesselConfirmed(!vesselConfirmed) }}
                 >
                   {vesselConfirmed ? '수정' : '확인'}
