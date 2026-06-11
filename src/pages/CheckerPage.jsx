@@ -185,7 +185,7 @@ export default function CheckerPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F0F3FA] flex flex-col">
+    <div className="min-h-screen bg-[#F0F3FA] flex flex-col overflow-y-auto">
 
       {/* 헤더 */}
       <div className="bg-white px-5 pt-10 pb-0 shadow-sm">
