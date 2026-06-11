@@ -380,7 +380,15 @@ export default function NetlogMap() {
   }, [])
 
   return (
-    <div style={{ width: '100vw', height: '100vh', overflow: 'hidden' }}>
+    <div style={{ 
+        width: '100vw', 
+        height: '100vh', 
+        overflow: 'hidden',
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        backgroundColor: '#ffffff'
+      }}>
       <canvas ref={canvasRef} id="webgl-canvas" />
 
       <div ref={minrakRef} id="ui-panel-minrak" className="ui-panel hidden">
