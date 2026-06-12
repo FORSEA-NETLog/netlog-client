@@ -51,7 +51,7 @@ export function Sidebar({ onLogout }) {
           width: '40px', height: '40px', borderRadius: '10px', border: 'none',
           backgroundColor: 'transparent', cursor: 'pointer',
           color: '#9CA3AF', fontSize: '11px'
-        }}>나가기</button>
+        }}>로그아웃</button>
     </aside>
   )
 }
@@ -89,9 +89,9 @@ export function BottomNav() {
   )
 }
 
-export default function DashboardLayout({ children, onLogout }) {
+export default function DashboardLayout({ children, onLogout, bgColor = '#fff' }) {
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#F9FAFB' }}>
+    <div style={{ minHeight: '100vh', backgroundColor: bgColor || '#F9FAFB' }}>
       <Sidebar onLogout={onLogout} />
       <div style={{
         marginLeft: window.innerWidth >= 768 ? '56px' : '0',
