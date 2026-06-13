@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import axiosInstance from '../api/axiosInstance'
 import DashboardLayout from '../components/DashboardLayout'
+import side3 from '../assets/side3.svg'
+import { activeFilter } from '../components/DashboardLayout'
 
 function Stepper({ current }) {
   const steps = ['수거 정보', '보관 장소', '수거 완료']
@@ -79,10 +81,22 @@ export default function CollectionStep1Page() {
 
   return (
     <DashboardLayout onLogout={handleLogout}>
-      <div style={{ backgroundColor: '#fff', borderBottom: '1px solid #F3F4F6', padding: '14px 24px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-        <span style={{ fontSize: '16px' }}>📍</span>
-        <span style={{ fontSize: '15px', fontWeight: 600, color: '#111827' }}>수거 정보 입력</span>
-      </div>
+    {/* 헤더 */}
+    <div style={{
+    backgroundColor: '#fff',
+    padding: '16px 28px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderBottom: '1px solid #E4E8F0'
+    }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <img src={side3} width="22" height="22" style={{ filter: activeFilter }} />
+        <span style={{ fontSize: '20px', fontWeight: 600, color: '#111827' }}>
+        수거 정보 입력
+        </span>
+    </div>
+    </div>
 
       <div style={{ maxWidth: '720px', width: '100%', margin: '0 auto', padding: '0 24px 120px' }}>
         <Stepper current={1} />
