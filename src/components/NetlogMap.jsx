@@ -108,9 +108,9 @@ const TreeSVG = ({ filled, popped }) => (
   </svg>
 )
 
-const BIG_NUM = (color='#0F2D4A') => ({ color, fontSize:'48px', fontWeight:800, lineHeight:'1', letterSpacing:'-0.03em' })
+const BIG_NUM = (color='#0F2D4A') => ({ color, fontSize:'38px', fontWeight:800, lineHeight:'1', letterSpacing:'-0.03em' })
 const MED_NUM = (color='#0F2D4A') => ({ color, fontSize:'38px', fontWeight:800, lineHeight:'1', letterSpacing:'-0.03em' })
-const LABEL = { color:'rgba(15,45,74,0.60)', fontSize:'16px', fontWeight:500, letterSpacing:'0.01em', display:'flex', alignItems:'center', gap:'5px' }
+const LABEL = { color:'rgba(15,45,74,0.60)', fontSize:'14px', fontWeight:500, letterSpacing:'0.01em', display:'flex', alignItems:'center', gap:'5px' }
 const UNIT  = { color:'rgba(15,45,74,0.45)', fontSize:'16px', fontWeight:400 }
 const SUB   = { color:'rgba(15,45,74,0.45)', fontSize:'12px' }
 
