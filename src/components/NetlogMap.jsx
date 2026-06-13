@@ -510,7 +510,7 @@ export default function NetlogMap() {
   }, [])
 
   return (
-    <div style={{width:'100vw',height:'100dvh',overflow:'hidden',position:'fixed',top:0,left:0,backgroundColor:'#fff'}}>
+    <div style={{width:'100vw',height:'100vh',overflow:'hidden',position:'fixed',top:0,left:0,backgroundColor:'#fff'}}>
       <canvas ref={canvasRef} id="webgl-canvas"/>
       <MinrakPanel  visible={minrakVisible}  onClose={() => setMinrakVisible(false)}/>
       <SummaryPanel visible={summaryVisible} onClose={handleSummaryClose}/>
