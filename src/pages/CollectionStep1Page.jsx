@@ -45,10 +45,13 @@ export default function CollectionStep1Page() {
   const navigate = useNavigate()
   const { collectionId } = useParams()
 
+  const DRAFT_KEY = `draft_step1_${collectionId}`
+
   const [record, setRecord] = useState(null)
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
+  const [draftRestored, setDraftRestored] = useState(false)
 
   // 폼 상태
   const [transferPerson, setTransferPerson] = useState(
@@ -68,14 +71,36 @@ export default function CollectionStep1Page() {
       .then(res => {
         const data = res.data.data
         setRecord(data)
-        // 각 집하장 weight 초기화
-        const init = {}
-        data.sites.forEach(s => { init[s.detail_id] = s.weight_kg || '' })
-        setSiteWeights(init)
+
+        // 임시저장 복원 시도
+        const saved = localStorage.getItem(DRAFT_KEY)
+        if (saved) {
+          try {
+            const draft = JSON.parse(saved)
+            if (draft.transferPerson) setTransferPerson(draft.transferPerson)
+            if (draft.vehicleNumber)  setVehicleNumber(draft.vehicleNumber)
+            if (draft.siteWeights)    setSiteWeights(draft.siteWeights)
+            setDraftRestored(true)
+            setTimeout(() => setDraftRestored(false), 3000)
+          } catch (e) {
+            // 파싱 실패 시 무시
+          }
+        } else {
+          // 임시저장 없으면 서버값으로 초기화
+          const init = {}
+          data.sites.forEach(s => { init[s.detail_id] = s.weight_kg || '' })
+          setSiteWeights(init)
+        }
       })
       .catch(console.error)
       .finally(() => setLoading(false))
   }, [collectionId])
+
+  // 입력값 변경 시 자동 임시저장
+  useEffect(() => {
+    if (loading) return
+    localStorage.setItem(DRAFT_KEY, JSON.stringify({ transferPerson, vehicleNumber, siteWeights }))
+  }, [transferPerson, vehicleNumber, siteWeights])
 
   const handleSubmit = async () => {
     if (!transferPerson || !vehicleNumber) {
@@ -99,6 +124,8 @@ export default function CollectionStep1Page() {
           weight_kg: parseFloat(siteWeights[s.detail_id])
         }))
       })
+      // 제출 성공 시 임시저장 삭제
+      localStorage.removeItem(DRAFT_KEY)
       navigate(`/dashboard/collections/${collectionId}/step2`)
     } catch (e) {
       setError('저장에 실패했습니다. 다시 시도해주세요')
@@ -130,6 +157,20 @@ export default function CollectionStep1Page() {
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#F9FAFB', display: 'flex', flexDirection: 'column' }}>
+
+      {/* 임시저장 복원 토스트 */}
+      {draftRestored && (
+        <div style={{
+          position: 'fixed', top: '16px', left: '50%', transform: 'translateX(-50%)',
+          backgroundColor: '#1D4ED8', color: '#fff',
+          padding: '10px 20px', borderRadius: '10px',
+          fontSize: '13px', fontWeight: 600, zIndex: 100,
+          boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+          display: 'flex', alignItems: 'center', gap: '8px'
+        }}>
+          💾 이전에 입력하던 내용을 불러왔습니다
+        </div>
+      )}
 
       {/* 헤더 */}
       <div style={{

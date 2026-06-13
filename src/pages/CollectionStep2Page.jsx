@@ -44,12 +44,15 @@ export default function CollectionStep2Page() {
   const navigate = useNavigate()
   const { collectionId } = useParams()
 
+  const DRAFT_KEY = `draft_step2_${collectionId}`
+
   const [record, setRecord] = useState(null)
   const [racks, setRacks] = useState([])
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
   const [rackInputs, setRackInputs] = useState({})
+  const [draftRestored, setDraftRestored] = useState(false)
 
   useEffect(() => {
     Promise.all([
@@ -59,12 +62,35 @@ export default function CollectionStep2Page() {
       const rec = recordRes.data.data
       setRecord(rec)
       setRacks(racksRes.data.data.items)
-      const init = {}
-      rec.sites.forEach(s => { init[s.detail_id] = { A: '', B: '', C: '', D: '' } })
-      setRackInputs(init)
+
+      // 임시저장 복원 시도
+      const saved = localStorage.getItem(DRAFT_KEY)
+      if (saved) {
+        try {
+          const draft = JSON.parse(saved)
+          setRackInputs(draft)
+          setDraftRestored(true)
+          setTimeout(() => setDraftRestored(false), 3000)
+        } catch (e) {
+          // 파싱 실패 시 기본값으로
+          const init = {}
+          rec.sites.forEach(s => { init[s.detail_id] = { A: '', B: '', C: '', D: '' } })
+          setRackInputs(init)
+        }
+      } else {
+        const init = {}
+        rec.sites.forEach(s => { init[s.detail_id] = { A: '', B: '', C: '', D: '' } })
+        setRackInputs(init)
+      }
     }).catch(console.error)
       .finally(() => setLoading(false))
   }, [collectionId])
+
+  // 입력값 변경 시 자동 임시저장
+  useEffect(() => {
+    if (loading || Object.keys(rackInputs).length === 0) return
+    localStorage.setItem(DRAFT_KEY, JSON.stringify(rackInputs))
+  }, [rackInputs])
 
   const getRack = (code) => racks.find(r => r.rack_code === code) || { current_count: 0, max_capacity: 50 }
 
@@ -103,6 +129,8 @@ export default function CollectionStep2Page() {
           .map(([rack_code, bag_count]) => ({ rack_code, bag_count: parseInt(bag_count) }))
       }))
       await axiosInstance.post(`/dashboard/collection-records/${collectionId}/stacking`, { sites })
+      // 제출 성공 시 임시저장 삭제
+      localStorage.removeItem(DRAFT_KEY)
       navigate(`/dashboard/collections/${collectionId}/step3`)
     } catch (e) {
       const detail = e.response?.data?.detail
@@ -123,6 +151,20 @@ export default function CollectionStep2Page() {
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#F9FAFB', display: 'flex', flexDirection: 'column' }}>
+
+      {/* 임시저장 복원 토스트 */}
+      {draftRestored && (
+        <div style={{
+          position: 'fixed', top: '16px', left: '50%', transform: 'translateX(-50%)',
+          backgroundColor: '#1D4ED8', color: '#fff',
+          padding: '10px 20px', borderRadius: '10px',
+          fontSize: '13px', fontWeight: 600, zIndex: 100,
+          boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+          display: 'flex', alignItems: 'center', gap: '8px'
+        }}>
+          💾 이전에 입력하던 내용을 불러왔습니다
+        </div>
+      )}
 
       {/* 헤더 */}
       <div style={{
