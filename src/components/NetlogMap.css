@@ -1,228 +1,125 @@
-/* =========================================
-   1. 기본 레이아웃 및 캔버스 설정
-   ========================================= */
-   html, body {
-    margin: 0;
-    padding: 0;
-    background-color: #ffffff; 
-}
+html, body { margin: 0; padding: 0; background-color: #ffffff; }
+canvas { display: block; width: 100%; height: 100%; }
 
-canvas {
-    display: block; 
-    width: 100%;
-    height: 100%;
-}
-
-#app {
-  position: relative;
-  width: 100%;
-  height: 100%;
-}
-
-/* =========================================
-   2. UI 패널 공통 애니메이션 및 레이아웃
-   ========================================= */
 .ui-panel {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  z-index: 10;
-  
-  width: 344px;
-  height: 650px; 
-  max-height: 90vh; 
-  
-  background: linear-gradient(180deg, rgba(239, 246, 255, 0.7) 0%, rgba(236, 254, 255, 0.7) 100%);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  box-shadow: 0px 4px 6px -4px rgba(0, 0, 0, 0.10), 0px 10px 15px -3px rgba(0, 0, 0, 0.10);
-  border-radius: 24px;
+  position: absolute; top: 50%; left: 50%; z-index: 10;
+  /* width: 350px; height: auto;
+  max-height: 88vh; */
+
+  width: min(350px, 92vw);
+  height: auto;
+  max-height: 85vh;
+  overflow-y: auto; /* 패널 자체가 스크롤 */
   overflow: hidden;
-  font-family: 'Inter', sans-serif;
-  
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
 
-  transform: translate(-50%, -50%) scale(1);
-  opacity: 1;
-  filter: blur(0px);
-
-  transition: opacity 0.5s cubic-bezier(0.25, 1, 0.5, 1),
-              filter 0.5s cubic-bezier(0.25, 1, 0.5, 1),
-              transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+  background: rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  box-shadow: 0 8px 32px rgba(31, 60, 90, 0.18), inset 0 1px 0 rgba(255,255,255,0.6);
+  border-radius: 28px; overflow: hidden;
+  font-family: 'Inter', 'Pretendard', sans-serif;
+  display: flex; flex-direction: column; box-sizing: border-box;
+  transform: translate(-50%, -50%) scale(1); opacity: 1; filter: blur(0px);
+  transition: opacity 0.45s cubic-bezier(0.25,1,0.5,1),
+              filter 0.45s cubic-bezier(0.25,1,0.5,1),
+              transform 0.45s cubic-bezier(0.25,1,0.5,1);
 }
-
 .hidden {
-  opacity: 0 !important;
-  filter: blur(15px) !important;
-  transform: translate(-50%, -47%) scale(0.96) !important;
+  opacity: 0 !important; filter: blur(16px) !important;
+  transform: translate(-50%, -47%) scale(0.95) !important;
   pointer-events: none !important;
 }
-
 .panel-body {
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  flex: 1; 
-  overflow-y: auto; 
+  padding: 18px 18px 8px; display: flex; flex-direction: column;
+  flex: 1; overflow-y: auto; gap: 10px;
+  overflow-y: auto;
 }
+.panel-body::-webkit-scrollbar { width: 0; }
 
-/* =========================================
-   3. 민락항 패널 전용 스타일
-   ========================================= */
-.panel-header {
-  position: relative;
-  /* 💡 높이를 192px -> 130px로 줄여서 스크롤바가 생기지 않도록 여백 확보 */
-  height: 130px; 
-  flex-shrink: 0; 
-}
-
-.panel-header img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover; /* 세로가 줄어들어도 이미지가 비율에 맞게 잘리도록 처리 */
-}
-
+.panel-header { position: relative; height: 140px; flex-shrink: 0; }
+.panel-header img { width: 100%; height: 100%; object-fit: cover; }
 .badge-port {
-  position: absolute;
-  left: 16px;
-  top: 16px;
-  background: rgba(255, 255, 255, 0.95);
-  padding: 8px 16px;
-  border-radius: 14px;
-  border: 1px solid #E5E7EB;
-  box-shadow: 0px 4px 6px -4px rgba(0, 0, 0, 0.10);
-  color: #005F5A;
-  font-size: 14px;
-  font-weight: 500;
+  position: absolute; left: 14px; top: 14px;
+  background: rgba(255,255,255,0.90); backdrop-filter: blur(8px);
+  padding: 6px 14px; border-radius: 20px;
+  border: 1px solid rgba(255,255,255,0.6);
+  color: #1A3F6F; font-size: 20px; font-weight: 700; letter-spacing: 0.02em;
 }
-
-.env-section {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin-top: 20px;
-}
-
+.env-section { display: flex; flex-direction: column; gap: 10px; }
 .env-title {
-  color: #364153;
-  font-size: 14px;
-  font-weight: 500;
-  padding-left: 4px;
+  color: rgba(255,255,255,0.8); font-size: 12px; font-weight: 600;
+  letter-spacing: 0.08em; text-transform: uppercase; padding-left: 2px;
 }
 
-/* =========================================
-   4. 요약 패널 전용 스타일 (날짜 및 여백)
-   ========================================= */
-.date-section {
-  margin-bottom: 24px; 
-}
-
+/* 날짜 배지 */
+.date-section { position: relative; }
 .date-badge {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 12px;
-  padding: 12px;
-  background: white;
-  border-radius: 10px;
-  border: 1px solid #E5E7EB;
+  display: flex; justify-content: center; align-items: center; gap: 8px;
+  padding: 12px 16px;
+  background: rgba(255,255,255,0.55); backdrop-filter: blur(8px);
+  border-radius: 14px; border: 1px solid rgba(255,255,255,0.7);
+  cursor: pointer; transition: background 0.2s, border-color 0.2s; user-select: none;
 }
+.date-badge:hover { background: rgba(255,255,255,0.75); border-color: rgba(255,255,255,0.95); }
+.date-badge span { color: #0F2D4A; font-size: 13.5px; font-weight: 600; white-space: nowrap; }
 
-.date-icon {
-  width: 15px;
-  height: 15px;
-  outline: 1.67px solid #99A1AF;
-  outline-offset: -0.83px;
+/* 캘린더 */
+.calendar-dropdown {
+  position: absolute; top: calc(100% + 8px); left: 0; right: 0;
+  background: rgba(255,255,255,0.95); backdrop-filter: blur(20px);
+  border-radius: 18px; border: 1px solid rgba(255,255,255,0.8);
+  box-shadow: 0 8px 32px rgba(31,60,90,0.16);
+  z-index: 100; padding: 14px; box-sizing: border-box;
 }
+.calendar-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.calendar-nav button { background: none; border: none; font-size: 18px; cursor: pointer; color: #1A3F6F; padding: 4px 8px; border-radius: 8px; transition: background 0.15s; }
+.calendar-nav button:hover { background: rgba(26,63,111,0.08); }
+.calendar-nav span { font-size: 14px; font-weight: 700; color: #0F2D4A; }
+.calendar-hint { font-size: 11px; color: #9CA3AF; text-align: center; margin-bottom: 6px; }
+.calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+.cal-header { text-align: center; font-size: 11px; color: #9CA3AF; padding: 4px 0; font-weight: 600; }
+.cal-day { text-align: center; padding: 6px 2px; font-size: 12px; color: #374151; border-radius: 7px; cursor: pointer; transition: background 0.12s; }
+.cal-day:hover { background: rgba(26,63,111,0.08); }
+.cal-day.cal-start, .cal-day.cal-end { background: #1A5FA8; color: #fff; font-weight: 700; }
+.cal-day.cal-range { background: rgba(26,95,168,0.10); color: #1A5FA8; }
 
-.date-badge span {
-  color: #364153;
-  font-size: 14px;
-  font-weight: 400;
-  line-height: 20px;
-  white-space: nowrap;
-}
-
-.stat-cards-wrapper {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  margin-bottom: 20px;
-}
-
-/* =========================================
-   5. 통계 카드 공통 스타일
-   ========================================= */
+/* 카드 */
 .stat-card {
-  background: white;
-  padding: 20px;
-  border-radius: 16px;
-  border: 1px solid #E5E7EB;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  flex-shrink: 0;
+  background: rgba(255,255,255,0.62); backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,0.80);
+  border-radius: 18px; padding: 16px 18px;
+  display: flex; flex-direction: column; gap: 7px; flex-shrink: 0;
+  transition: transform 0.18s ease, background 0.18s ease;
 }
+.stat-card:hover { transform: translateY(-2px); background: rgba(255,255,255,0.80); }
+.stat-value-group { display: flex; align-items: baseline; justify-content: space-between; }
 
-.stat-title {
-  color: #4A5565;
-  font-size: 14px;
-  font-weight: 400;
-  line-height: 17.5px;
+/* 소형차 */
+.car-icon { transition: transform 0.15s ease, filter 0.15s ease; cursor: default; }
+.car-icon:hover { transform: scale(1.18) translateY(-2px); }
+/* .car-icon.filled:hover { filter: drop-shadow(0 2px 6px rgba(255, 139, 139, 0.92)); } */
+
+/* 나무 팝인 */
+@keyframes treePopin {
+  0%   { transform: scale(0) translateY(6px); opacity: 0; }
+  65%  { transform: scale(1.18) translateY(-2px); }
+  100% { transform: scale(1) translateY(0); opacity: 1; }
 }
+.tree-icon { display: inline-block; }
+.tree-icon.popped { animation: treePopin 0.28s cubic-bezier(0.34,1.56,0.64,1) both; }
 
-.stat-value-group {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between; 
-}
+/* 배터리 번쩍 */
+@keyframes batteryFlash { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+.battery-flash { animation: batteryFlash 0.28s ease 2; }
 
-.stat-number.primary-color {
-  color: #00786F;
-  font-size: 36px;
-  font-weight: 700;
-  line-height: 40px;
-}
-
-.stat-number.dark-color { 
-  color: #101828;
-  font-size: 24px;
-  font-weight: 700;
-  line-height: 32px;
-}
-
-.stat-unit {
-  color: #4A5565;
-  font-size: 14px;
-  font-weight: 400;
-  line-height: 20px;
-}
-
-.stat-date {
-  color: #4A5565;
-  font-size: 14px;
-  margin-top: 4px;
-}
-
-/* =========================================
-   6. 닫기 버튼 공통 스타일
-   ========================================= */
+/* 닫기 버튼 */
 .close-button {
-  margin: auto 20px 20px 20px;
-  padding: 14px;
-  background-color: #364153;
-  color: white;
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
-  font-weight: 600;
-  font-size: 15px;
-  transition: background-color 0.2s ease;
-  flex-shrink: 0; 
+  margin: 8px 18px 18px; padding: 15px;
+  background: rgba(15,45,74,0.85); backdrop-filter: blur(8px);
+  color: rgba(255,255,255,0.95); border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 16px; cursor: pointer; font-weight: 700; font-size: 16px;
+  letter-spacing: 0.04em; transition: background 0.18s, transform 0.1s; flex-shrink: 0;
 }
-
-.close-button:hover {
-  background-color: #1f2937;
-}
+.close-button:hover { background: rgba(10,30,55,0.92); }
+.close-button:active { transform: scale(0.98); }

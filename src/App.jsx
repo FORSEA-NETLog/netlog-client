@@ -10,6 +10,9 @@ import CollectionsPage from './pages/CollectionsPage'
 import CollectionStep1Page from './pages/CollectionStep1Page'
 import CollectionStep2Page from './pages/CollectionStep2Page'
 import CollectionStep3Page from './pages/CollectionStep3Page'
+import StoragePage from './pages/StoragePage'
+import ProcessingPage from './pages/ProcessingPage'
+import StatusPage from './pages/StatusPage'
 import ProtectedRoute from './components/ProtectedRoute'
 
 function App() {
@@ -45,6 +48,15 @@ function App() {
         } />
         <Route path="/dashboard/collections/:collectionId/step3" element={
           <ProtectedRoute role="admin"><CollectionStep3Page /></ProtectedRoute>
+        } />
+        <Route path="/dashboard/storage" element={
+          <ProtectedRoute role="admin"><StoragePage /></ProtectedRoute>
+        } />
+        <Route path="/dashboard/processing" element={
+          <ProtectedRoute role="admin"><ProcessingPage /></ProtectedRoute>
+        } />
+        <Route path="/dashboard/status" element={
+          <ProtectedRoute role="admin"><StatusPage /></ProtectedRoute>
         } />
       </Routes>
     </BrowserRouter>
