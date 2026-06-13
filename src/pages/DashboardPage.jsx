@@ -51,7 +51,7 @@ export default function DashboardPage() {
   const [selectedSites, setSelectedSites] = useState([])
   const [loading, setLoading] = useState(true)
   const [modalStep, setModalStep] = useState(null)
-  const [planManagerName, setPlanManagerName] = useState(localStorage.getItem('manager_name') || '')
+  const [planManagerName, setPlanManagerName] = useState('')
   const [creating, setCreating] = useState(false)
 
   // const managerName = localStorage.getItem('manager_name') || '관리자'
@@ -99,14 +99,14 @@ export default function DashboardPage() {
   const handleCloseModal = () => {
     setModalStep(null)
     setSelectedSites([])
-    setPlanManagerName(localStorage.getItem('manager_name') || '')
+    setPlanManagerName('')
   }
 
   const today = new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' })
   const bagColor = (status) => status === 'red' ? '#EF4444' : status === 'yellow' ? '#F59E0B' : '#10B981'
 
   return (
-    <DashboardLayout onLogout={handleLogout} bgColor="#EEF2FF">
+    <DashboardLayout onLogout={handleLogout} bgColor="#F0F3FA">
 
       {/* 상단 헤더 */}
       <div style={{

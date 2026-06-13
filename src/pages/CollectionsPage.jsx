@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import axiosInstance from '../api/axiosInstance'
 import DashboardLayout, { activeFilter } from '../components/DashboardLayout'
 import side2 from '../assets/side2.svg'
+import truck from '../assets/truck.svg'
 
 function StatusBadge({ status }) {
   const map = {
@@ -65,38 +66,95 @@ export default function CollectionsPage() {
   })
 
   return (
-    <DashboardLayout onLogout={handleLogout}>
-      <div style={{ backgroundColor: '#fff', borderBottom: '1px solid #F3F4F6', padding: '14px 24px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-        <img src={side2} width="22" height="22" style={{ filter: activeFilter }} />
-        <span style={{ fontSize: '15px', fontWeight: 600, color: '#111827' }}>수거 관리</span>
+    <DashboardLayout onLogout={handleLogout} bgColor="#F0F3FA">
+      <div style={{
+          backgroundColor: '#fff',
+          padding: '16px 28px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between'
+      }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <img src={side2} width="22" height="22" style={{ filter: activeFilter }} />
+          <span style={{ fontSize: '20px', fontWeight: 600, color: '#111827' }}>
+              수거 관리
+          </span>
+          </div>
       </div>
 
       <div style={{ padding: '20px 24px' }}>
-        <div style={{ backgroundColor: '#fff', borderRadius: '12px', border: '1px solid #F3F4F6', padding: '12px 20px', display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap', marginBottom: '16px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ fontSize: '13px', color: '#6B7280' }}>항구명:</span>
+        <div style={{ borderRadius: '12px', border: '1px solid #F3F4F6', padding: '12px 20px', display: 'flex', alignItems: 'center', gap: '60px', flexWrap: 'wrap', marginBottom: '16px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <span style={{ fontSize: '18px', color: '#6B7280' }}>항구명:</span>
             <select value={filterSite} onChange={e => setFilterSite(e.target.value)}
-              style={{ border: '1px solid #E5E7EB', borderRadius: '8px', padding: '6px 28px 6px 10px', fontSize: '13px', color: '#111827', backgroundColor: '#fff', cursor: 'pointer', outline: 'none', appearance: 'none', backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 8px center' }}>
+              style={{ border: '2px solid #E5E7EB', borderRadius: '8px', padding: '8px 18px', fontSize: '18px', color: '#111827', backgroundColor: '#fff', cursor: 'pointer', outline: 'none', appearance: 'none', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 8px center' }}>
               <option value="">전체 항구</option>
               {sites.map(s => <option key={s.site_id} value={s.site_id}>{s.site_name}</option>)}
             </select>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ fontSize: '13px', color: '#6B7280' }}>날짜:</span>
-            <input type="text" value={filterDateFrom} onChange={e => setFilterDateFrom(e.target.value)} style={{ border: '1px solid #E5E7EB', borderRadius: '8px', padding: '6px 10px', fontSize: '13px', width: '100px', outline: 'none' }} />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <span style={{ fontSize: '18px', color: '#6B7280' }}>날짜:</span>
+            <input
+              type="date"
+              value={filterDateFrom}
+              onChange={e => setFilterDateFrom(e.target.value)}
+              style={{
+                border: '1px solid #E5E7EB',
+                borderRadius: '8px',
+                padding: '8px 18px',
+                fontSize: '18px',
+                width: '150px',
+                outline: 'none',
+                color: '#111827',
+                backgroundColor: '#fff'
+              }}
+            />
+
             <span style={{ color: '#9CA3AF' }}>~</span>
-            <input type="text" value={filterDateTo} onChange={e => setFilterDateTo(e.target.value)} style={{ border: '1px solid #E5E7EB', borderRadius: '8px', padding: '6px 10px', fontSize: '13px', width: '100px', outline: 'none' }} />
+
+            <input
+              type="date"
+              value={filterDateTo}
+              onChange={e => setFilterDateTo(e.target.value)}
+              style={{
+                border: '1px solid #E5E7EB',
+                borderRadius: '8px',
+                padding: '8px 18px',
+                fontSize: '18px',
+                width: '150px',
+                outline: 'none',
+                color: '#111827',
+                backgroundColor: '#fff'
+              }}
+            />
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ fontSize: '13px', color: '#6B7280' }}>상태:</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <span style={{ fontSize: '18px', color: '#6B7280' }}>상태:</span>
             {[{ key: 'planned', label: '수거 대기' }, { key: 'stacked', label: '수거 완료' }].map(({ key, label }) => (
               <button key={key} onClick={() => toggleStatusFilter(key)}
-                style={{ padding: '6px 12px', borderRadius: '8px', fontSize: '13px', border: `1px solid ${filterStatus.includes(key) ? '#0055FF' : '#E5E7EB'}`, backgroundColor: filterStatus.includes(key) ? '#EFF6FF' : '#fff', color: filterStatus.includes(key) ? '#0055FF' : '#6B7280', cursor: 'pointer', fontWeight: filterStatus.includes(key) ? 600 : 400 }}>{label}</button>
+                style={{ padding: '8px 18px', borderRadius: '8px', fontSize: '18px', border: `2px solid ${filterStatus.includes(key) ? '#0055FF' : '#E5E7EB'}`, backgroundColor: filterStatus.includes(key) ? '#EFF6FF' : '#fff', color: filterStatus.includes(key) ? '#0055FF' : '#6B7280', cursor: 'pointer', fontWeight: filterStatus.includes(key) ? 600 : 400 }}>{label}</button>
             ))}
           </div>
-          <button onClick={handleStart} disabled={selectedIds.length === 0}
-            style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 16px', borderRadius: '10px', border: 'none', backgroundColor: selectedIds.length > 0 ? '#0055FF' : '#E5E7EB', color: selectedIds.length > 0 ? '#fff' : '#9CA3AF', fontSize: '13px', fontWeight: 600, cursor: selectedIds.length > 0 ? 'pointer' : 'not-allowed' }}>
-            🚛 수거 시작
+          <button
+            onClick={handleStart}
+            disabled={selectedIds.length === 0}
+            style={{
+              marginLeft: 'auto',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '12px 20px',
+              borderRadius: '10px',
+              border: '1px solid #E5E7EB',
+              backgroundColor: selectedIds.length > 0 ? '#0055FF' : '#fff',
+              color: selectedIds.length > 0 ? '#fff' : '#4A5568',
+              fontSize: '16px',
+              fontWeight: 500,
+              cursor: selectedIds.length > 0 ? 'pointer' : 'not-allowed'
+            }}
+          >
+            <img src={truck} alt="" className="w-6 h-6" style={{ filter: selectedIds.length > 0 ? 'brightness(0) invert(1)' : undefined }} />
+            수거 시작
           </button>
         </div>
 
@@ -113,7 +171,7 @@ export default function CollectionsPage() {
               const totalBags = record.sites.reduce((sum, s) => sum + s.bag_count, 0)
               return (
                 <div key={record.collection_id} style={{ backgroundColor: '#fff', borderRadius: '12px', border: `1px solid ${selected ? '#BFDBFE' : '#F3F4F6'}`, overflow: 'hidden' }}>
-                  <div style={{ padding: '16px 20px', display: 'flex', alignItems: 'center', gap: '12px', backgroundColor: selected ? '#EFF6FF' : '#fff' }}>
+                  <div style={{ padding: '40px 20px', display: 'flex', alignItems: 'center', gap: '12px', backgroundColor: selected ? '#EFF6FF' : '#fff' }}>
                     <input type="checkbox" checked={selected} onChange={() => toggleSelect(record.collection_id)} style={{ width: '16px', height: '16px', accentColor: '#0055FF', cursor: 'pointer' }} />
                     <div style={{ flex: 1 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
