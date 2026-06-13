@@ -82,82 +82,102 @@ export default function CollectionsPage() {
           </div>
       </div>
 
-      <div style={{ padding: '20px 24px' }}>
-        <div style={{ borderRadius: '12px', border: '1px solid #F3F4F6', padding: '12px 20px', display: 'flex', alignItems: 'center', gap: '60px', flexWrap: 'wrap', marginBottom: '16px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <span style={{ fontSize: '18px', color: '#6B7280' }}>항구명:</span>
-            <select value={filterSite} onChange={e => setFilterSite(e.target.value)}
-              style={{ border: '2px solid #E5E7EB', borderRadius: '8px', padding: '8px 18px', fontSize: '18px', color: '#111827', backgroundColor: '#fff', cursor: 'pointer', outline: 'none', appearance: 'none', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 8px center' }}>
-              <option value="">전체 항구</option>
-              {sites.map(s => <option key={s.site_id} value={s.site_id}>{s.site_name}</option>)}
-            </select>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <span style={{ fontSize: '18px', color: '#6B7280' }}>날짜:</span>
-            <input
-              type="date"
-              value={filterDateFrom}
-              onChange={e => setFilterDateFrom(e.target.value)}
-              style={{
-                border: '1px solid #E5E7EB',
-                borderRadius: '8px',
-                padding: '8px 18px',
-                fontSize: '18px',
-                width: '150px',
-                outline: 'none',
-                color: '#111827',
-                backgroundColor: '#fff'
-              }}
-            />
-
-            <span style={{ color: '#9CA3AF' }}>~</span>
-
-            <input
-              type="date"
-              value={filterDateTo}
-              onChange={e => setFilterDateTo(e.target.value)}
-              style={{
-                border: '1px solid #E5E7EB',
-                borderRadius: '8px',
-                padding: '8px 18px',
-                fontSize: '18px',
-                width: '150px',
-                outline: 'none',
-                color: '#111827',
-                backgroundColor: '#fff'
-              }}
-            />
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <span style={{ fontSize: '18px', color: '#6B7280' }}>상태:</span>
-            {[{ key: 'planned', label: '수거 대기' }, { key: 'stacked', label: '수거 완료' }].map(({ key, label }) => (
-              <button key={key} onClick={() => toggleStatusFilter(key)}
-                style={{ padding: '8px 18px', borderRadius: '8px', fontSize: '18px', border: `2px solid ${filterStatus.includes(key) ? '#0055FF' : '#E5E7EB'}`, backgroundColor: filterStatus.includes(key) ? '#EFF6FF' : '#fff', color: filterStatus.includes(key) ? '#0055FF' : '#6B7280', cursor: 'pointer', fontWeight: filterStatus.includes(key) ? 600 : 400 }}>{label}</button>
-            ))}
-          </div>
-          <button
-            onClick={handleStart}
-            disabled={selectedIds.length === 0}
-            style={{
-              marginLeft: 'auto',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              padding: '12px 20px',
-              borderRadius: '10px',
-              border: '1px solid #E5E7EB',
-              backgroundColor: selectedIds.length > 0 ? '#0055FF' : '#fff',
-              color: selectedIds.length > 0 ? '#fff' : '#4A5568',
-              fontSize: '16px',
-              fontWeight: 500,
-              cursor: selectedIds.length > 0 ? 'pointer' : 'not-allowed'
-            }}
-          >
-            <img src={truck} alt="" className="w-6 h-6" style={{ filter: selectedIds.length > 0 ? 'brightness(0) invert(1)' : undefined }} />
-            수거 시작
-          </button>
+      <div>
+      {/* 필터 영역 */}
+      <div style={{
+        backgroundColor: '#F0F3FA',
+        padding: '16px 28px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '60px',
+        flexWrap: 'wrap',
+        borderBottom: '1px solid #DDE2EF'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <span style={{ fontSize: '18px', color: '#6B7280' }}>항구명:</span>
+          <select value={filterSite} onChange={e => setFilterSite(e.target.value)}
+            style={{ border: '2px solid #E5E7EB', borderRadius: '8px', padding: '8px 18px', fontSize: '18px', color: '#111827', backgroundColor: '#fff', cursor: 'pointer', outline: 'none', appearance: 'none', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 8px center' }}>
+            <option value="">전체 항구</option>
+            {sites.map(s => <option key={s.site_id} value={s.site_id}>{s.site_name}</option>)}
+          </select>
         </div>
 
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <span style={{ fontSize: '18px', color: '#6B7280' }}>날짜:</span>
+          <input
+            type="date"
+            value={filterDateFrom}
+            onChange={e => setFilterDateFrom(e.target.value)}
+            style={{
+              border: '1px solid #E5E7EB',
+              borderRadius: '8px',
+              padding: '8px 18px',
+              fontSize: '18px',
+              width: '150px',
+              outline: 'none',
+              color: '#111827',
+              backgroundColor: '#fff'
+            }}
+          />
+
+          <span style={{ color: '#9CA3AF' }}>~</span>
+
+          <input
+            type="date"
+            value={filterDateTo}
+            onChange={e => setFilterDateTo(e.target.value)}
+            style={{
+              border: '1px solid #E5E7EB',
+              borderRadius: '8px',
+              padding: '8px 18px',
+              fontSize: '18px',
+              width: '150px',
+              outline: 'none',
+              color: '#111827',
+              backgroundColor: '#fff'
+            }}
+          />
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <span style={{ fontSize: '18px', color: '#6B7280' }}>상태:</span>
+          {[{ key: 'planned', label: '수거 대기' }, { key: 'stacked', label: '수거 완료' }].map(({ key, label }) => (
+            <button key={key} onClick={() => toggleStatusFilter(key)}
+              style={{ padding: '8px 18px', borderRadius: '8px', fontSize: '18px', border: `2px solid ${filterStatus.includes(key) ? '#0055FF' : '#E5E7EB'}`, backgroundColor: filterStatus.includes(key) ? '#EFF6FF' : '#fff', color: filterStatus.includes(key) ? '#0055FF' : '#6B7280', cursor: 'pointer', fontWeight: filterStatus.includes(key) ? 600 : 400 }}>
+              {label}
+            </button>
+          ))}
+        </div>
+
+        <button
+          onClick={handleStart}
+          disabled={selectedIds.length === 0}
+          style={{
+            marginLeft: 'auto',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            padding: '12px 20px',
+            borderRadius: '10px',
+            border: '1px solid #E5E7EB',
+            backgroundColor: selectedIds.length > 0 ? '#0055FF' : '#fff',
+            color: selectedIds.length > 0 ? '#fff' : '#4A5568',
+            fontSize: '16px',
+            fontWeight: 500,
+            cursor: selectedIds.length > 0 ? 'pointer' : 'not-allowed'
+          }}
+        >
+          <img src={truck} alt="" className="w-6 h-6" style={{ filter: selectedIds.length > 0 ? 'brightness(0) invert(1)' : undefined }} />
+          수거 시작
+        </button>
+      </div>
+
+      {/* 목록 영역 */}
+      <div style={{
+        backgroundColor: '#fff',
+        minHeight: 'calc(100vh - 132px)',
+        padding: '20px 28px'
+      }}>
         <p style={{ fontSize: '14px', color: '#6B7280', marginBottom: '12px' }}>총 {filtered.length}건</p>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
@@ -170,12 +190,12 @@ export default function CollectionsPage() {
               const siteCode = record.sites.map(s => s.site_code).join(', ')
               const totalBags = record.sites.reduce((sum, s) => sum + s.bag_count, 0)
               return (
-                <div key={record.collection_id} style={{ backgroundColor: '#fff', borderRadius: '12px', border: `1px solid ${selected ? '#BFDBFE' : '#F3F4F6'}`, overflow: 'hidden' }}>
+                <div key={record.collection_id} style={{ backgroundColor: '#fff', borderRadius: '12px', border: `2px solid ${selected ? '#BFDBFE' : '#F3F4F6'}`, overflow: 'hidden' }}>
                   <div style={{ padding: '40px 20px', display: 'flex', alignItems: 'center', gap: '12px', backgroundColor: selected ? '#EFF6FF' : '#fff' }}>
                     <input type="checkbox" checked={selected} onChange={() => toggleSelect(record.collection_id)} style={{ width: '16px', height: '16px', accentColor: '#0055FF', cursor: 'pointer' }} />
                     <div style={{ flex: 1 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <span style={{ fontSize: '15px', fontWeight: 700, color: '#111827' }}>{siteName}</span>
+                        <span style={{ fontSize: '20px', fontWeight: 700, color: '#111827' }}>{siteName}</span>
                         <span style={{ fontSize: '12px', color: '#9CA3AF' }}>{siteCode}</span>
                       </div>
                       <p style={{ fontSize: '12px', color: '#9CA3AF', margin: '2px 0 0' }}>수거 계획 관리자 : {record.manager_name}</p>
@@ -191,6 +211,7 @@ export default function CollectionsPage() {
                       </button>
                     </div>
                   </div>
+
                   {expanded && (
                     <div style={{ borderTop: '1px solid #F3F4F6', padding: '16px 20px', backgroundColor: '#F9FAFB' }}>
                       {record.sites.length > 0 ? (
@@ -217,6 +238,7 @@ export default function CollectionsPage() {
           }
         </div>
       </div>
+    </div>
     </DashboardLayout>
   )
 }
