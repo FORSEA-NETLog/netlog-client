@@ -34,6 +34,7 @@ export default function CollectionStep1Page() {
   const { collectionId } = useParams()
 
   const DRAFT_KEY = `draft_step1_${collectionId}`
+  const DRAFT_STEP_KEY = `draft_step_${collectionId}`
   const [record, setRecord] = useState(null)
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
@@ -97,11 +98,40 @@ export default function CollectionStep1Page() {
         vehicle_number: vehicleNumber,
         sites: record.sites.map(s => ({ detail_id: s.detail_id, weight_kg: parseFloat(siteWeights[s.detail_id]) }))
       })
-      // 제출 성공 시 임시저장 삭제
+      // 정식 제출 성공 시 임시저장 관련 키 모두 삭제
       localStorage.removeItem(DRAFT_KEY)
+      localStorage.removeItem(DRAFT_STEP_KEY)
       navigate(`/dashboard/collections/${collectionId}/step2`)
     } catch (e) { setError('저장에 실패했습니다. 다시 시도해주세요'); console.error(e) }
     finally { setSubmitting(false) }
+  }
+
+  const handleSaveDraft = async () => {
+    const hasAnyInput = transferPerson || vehicleNumber || Object.values(siteWeights).some(v => v)
+    setError('')
+    setSubmitting(true)
+    try {
+      if (hasAnyInput && transferPerson && vehicleNumber) {
+        // 운반 정보가 모두 있을 때만 API 저장 (API 필수값 충족)
+        const sites = record.sites.map(s => ({
+          detail_id: s.detail_id,
+          weight_kg: parseFloat(siteWeights[s.detail_id]) || 0
+        }))
+        await axiosInstance.patch(`/dashboard/collection-records/${collectionId}/info`, {
+          transfer_person_name: transferPerson,
+          vehicle_number: vehicleNumber,
+          sites
+        })
+      }
+      // 어느 스텝에서 임시저장했는지 기록
+      localStorage.setItem(DRAFT_STEP_KEY, '1')
+      navigate('/dashboard/collections')
+    } catch (e) {
+      setError('임시저장에 실패했습니다. 다시 시도해주세요')
+      console.error(e)
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   if (loading) return <DashboardLayout onLogout={handleLogout}><div style={{ padding: '48px', textAlign: 'center', color: '#9CA3AF' }}>불러오는 중...</div></DashboardLayout>
@@ -191,10 +221,15 @@ export default function CollectionStep1Page() {
       <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, backgroundColor: '#fff', borderTop: '1px solid #F3F4F6', padding: '16px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', zIndex: 10 }}>
         <button onClick={() => navigate(-1)} style={{ padding: '12px 20px', borderRadius: '10px', border: '1px solid #E5E7EB', backgroundColor: '#fff', fontSize: '14px', color: '#6B7280', cursor: 'pointer' }}>← 이전</button>
         <span style={{ fontSize: '13px', color: '#9CA3AF' }}>{completedCount} / 3 입력완료</span>
-        <button onClick={handleSubmit} disabled={submitting} style={{ padding: '12px 20px', borderRadius: '10px', border: 'none', backgroundColor: '#0055FF', color: '#fff', fontSize: '14px', fontWeight: 600, cursor: 'pointer' }}>
-          {submitting ? '저장 중...' : '보관 장소 입력 →'}
-        </button>
+        <div style={{ display: 'flex', gap: '10px' }}>
+          <button onClick={handleSaveDraft} disabled={submitting} style={{ padding: '12px 20px', borderRadius: '10px', border: '1.5px solid #6B7280', backgroundColor: '#fff', fontSize: '14px', color: '#6B7280', fontWeight: 600, cursor: 'pointer' }}>
+            {submitting ? '저장 중...' : '💾 임시저장'}
+          </button>
+          <button onClick={handleSubmit} disabled={submitting} style={{ padding: '12px 20px', borderRadius: '10px', border: 'none', backgroundColor: '#0055FF', color: '#fff', fontSize: '14px', fontWeight: 600, cursor: 'pointer' }}>
+            {submitting ? '저장 중...' : '보관 장소 입력 →'}
+          </button>
+        </div>
       </div>
-    </DashboardLayout>
+    </div>
   )
 }
