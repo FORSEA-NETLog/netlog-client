@@ -142,8 +142,8 @@ export default function DashboardPage() {
           {/* 테이블 헤더 */}
           <div style={{
             padding: '20px 28px', display: 'flex',
-            alignItems: 'center', justifyContent: 'space-between',
-            borderBottom: '1px solid #F3F4F6'
+            alignItems: 'center', justifyContent: 'space-between'
+            // borderBottom: '1px solid #F3F4F6'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <span style={{ marginLeft: '8px' }}><img

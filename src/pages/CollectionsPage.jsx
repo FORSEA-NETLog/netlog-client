@@ -4,6 +4,7 @@ import axiosInstance from '../api/axiosInstance'
 import DashboardLayout, { activeFilter } from '../components/DashboardLayout'
 import side2 from '../assets/side2.svg'
 import truck from '../assets/truck.svg'
+import toggle from '../assets/toggle.png'
 
 function StatusBadge({ status }) {
   const map = {
@@ -112,7 +113,8 @@ export default function CollectionsPage() {
           padding: '16px 28px',
           display: 'flex',
           alignItems: 'center',
-          gap: '60px',
+          columnGap: '60px',
+          rowGap: '24px',
           flexWrap: 'wrap',
           borderBottom: '1px solid #DDE2EF',
           position: 'sticky',
@@ -196,7 +198,7 @@ export default function CollectionsPage() {
                 fontWeight: filterDraftOnly ? 600 : 400,
               }}
             >
-              💾 임시저장만
+              💾 임시저장
             </button>
           </div>
 
@@ -247,7 +249,7 @@ export default function CollectionsPage() {
                   const draftStep = localStorage.getItem(`draft_step_${record.collection_id}`)
                   return (
                     <div key={record.collection_id} style={{ backgroundColor: '#fff', borderRadius: '12px', border: `2px solid ${selected ? '#BFDBFE' : '#F3F4F6'}`, overflow: 'hidden' }}>
-                      <div style={{ padding: '40px 20px', display: 'flex', alignItems: 'center', gap: '12px', backgroundColor: selected ? '#EFF6FF' : '#fff' }}>
+                      <div style={{ padding: '32px 20px', display: 'flex', alignItems: 'center', gap: '12px', backgroundColor: selected ? '#EFF6FF' : '#fff' }}>
                         <input type="checkbox" checked={selected} onChange={() => toggleSelect(record.collection_id)} style={{ width: '16px', height: '16px', accentColor: '#0055FF', cursor: 'pointer' }} />
                         <div style={{ flex: 1 }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -259,16 +261,16 @@ export default function CollectionsPage() {
                               </span>
                             )}
                           </div>
-                          <p style={{ fontSize: '12px', color: '#9CA3AF', margin: '2px 0 0' }}>수거 계획 관리자 : {record.manager_name}</p>
+                          <p style={{ fontSize: '14px', color: '#9CA3AF', margin: '2px 0 0' }}>수거 계획 관리자 : {record.manager_name}</p>
                           <div style={{ display: 'flex', gap: '16px', marginTop: '4px', flexWrap: 'wrap' }}>
                             {record.planned_at && (
-                              <span style={{ fontSize: '12px', color: '#6B7280' }}>
+                              <span style={{ fontSize: '14px', color: '#6B7280' }}>
                                 수거 계획 등록일: <span style={{ color: '#111827', fontWeight: 500 }}>{new Date(record.planned_at).toLocaleString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })}</span>
                               </span>
                             )}
                             {record.collected_at && (
-                              <span style={{ fontSize: '12px', color: '#6B7280' }}>
-                                수거 완료일: <span style={{ color: '#10B981', fontWeight: 600 }}>{new Date(record.collected_at).toLocaleString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })}</span>
+                              <span style={{ fontSize: '14px', color: '#6B7280' }}>
+                                수거 완료일: <span style={{ color: '#0055FF', fontWeight: 600 }}>{new Date(record.collected_at).toLocaleString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })}</span>
                               </span>
                             )}
                           </div>
@@ -294,8 +296,8 @@ export default function CollectionsPage() {
                             )}
                           </div>
                           <StatusBadge status={record.status} />
-                          <button onClick={() => toggleExpand(record.collection_id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9CA3AF', fontSize: '16px', padding: '4px' }}>
-                            {expanded ? '∧' : '∨'}
+                          <button onClick={() => toggleExpand(record.collection_id)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center' }}>
+                            <img src={toggle} alt="" width="14" height="14" style={{ transform: expanded ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s ease' }} />
                           </button>
                         </div>
                       </div>
