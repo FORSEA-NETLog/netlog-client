@@ -4,7 +4,7 @@ import axiosInstance from '../api/axiosInstance'
 import DashboardLayout, { activeFilter } from '../components/DashboardLayout'
 import side4 from '../assets/side4.svg'
 
-function Step1({ racks, totalStored, onNext }) {
+function Step1({ onNext }) {
   const [bagCount, setBagCount] = useState('')
   const [preview, setPreview] = useState(null)
   const [loading, setLoading] = useState(false)
@@ -29,34 +29,16 @@ function Step1({ racks, totalStored, onNext }) {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-      <div style={{ backgroundColor: '#fff', borderRadius: '16px', border: '1px solid #F3F4F6', padding: '20px' }}>
-        <p style={{ margin: '0 0 16px', fontSize: '14px', fontWeight: 600, color: '#111827' }}>전체 {totalStored}자루 보관 중</p>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px' }}>
-          {racks.map(rack => {
-            const pct = Math.min((rack.current_count / rack.max_capacity) * 100, 100)
-            return (
-              <div key={rack.rack_code} style={{ backgroundColor: '#F9FAFB', borderRadius: '10px', padding: '12px' }}>
-                <p style={{ margin: '0 0 4px', fontSize: '13px', fontWeight: 600, color: '#111827' }}>{rack.rack_code}구역</p>
-                <p style={{ margin: '0 0 8px', fontSize: '11px', color: '#9CA3AF' }}>{rack.current_count}/{rack.max_capacity}자루 적재 중</p>
-                <div style={{ height: '6px', backgroundColor: '#E5E7EB', borderRadius: '3px', overflow: 'hidden' }}>
-                  <div style={{ height: '100%', width: `${pct}%`, backgroundColor: '#0055FF', borderRadius: '3px' }} />
-                </div>
-              </div>
-            )
-          })}
-        </div>
-      </div>
-
-      <div style={{ backgroundColor: '#fff', borderRadius: '16px', border: '1px solid #F3F4F6', padding: '32px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
-        <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 700, color: '#111827' }}>공정에 투입할 마대자루 수</h3>
+      <div style={{ backgroundColor: '#fff', borderRadius: '16px', padding: '32px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
+        <h3 style={{ margin: 0, fontSize: '32px', fontWeight: 700, color: '#111827' }}>공정에 투입할 마대자루 수</h3>
         <p style={{ margin: 0, fontSize: '13px', color: '#9CA3AF', textAlign: 'center' }}>입력한 수량만큼 날짜 기준 선입선출(FIFO)로<br/>투입 대상이 자동 선정됩니다.</p>
-        <div style={{ position: 'relative', width: '200px' }}>
+        <div style={{ position: 'relative', width: '200px', margin: 30 }}>
           <input type="number" value={bagCount} onChange={e => { setBagCount(e.target.value); setPreview(null) }}
             style={{ width: '100%', padding: '12px 48px 12px 16px', border: '1px solid #E5E7EB', borderRadius: '10px', fontSize: '16px', outline: 'none', boxSizing: 'border-box', textAlign: 'center' }} placeholder="0" />
           <span style={{ position: 'absolute', right: '16px', top: '50%', transform: 'translateY(-50%)', color: '#9CA3AF', fontSize: '14px' }}>자루</span>
         </div>
         <button onClick={handleCalculate} disabled={!bagCount || parseInt(bagCount) <= 0 || loading}
-          style={{ padding: '14px 40px', borderRadius: '12px', border: 'none', backgroundColor: bagCount && parseInt(bagCount) > 0 ? '#0055FF' : '#E5E7EB', color: bagCount && parseInt(bagCount) > 0 ? '#fff' : '#9CA3AF', fontSize: '15px', fontWeight: 600, cursor: bagCount ? 'pointer' : 'not-allowed' }}>
+          style={{ padding: '14px 160px', borderRadius: '12px', border: 'none', backgroundColor: bagCount && parseInt(bagCount) > 0 ? '#0055FF' : '#E5E7EB', color: bagCount && parseInt(bagCount) > 0 ? '#fff' : '#9CA3AF', fontSize: '15px', fontWeight: 600, cursor: bagCount ? 'pointer' : 'not-allowed' }}>
           {loading ? '계산 중...' : '선입선출 계산 →'}
         </button>
       </div>
@@ -71,7 +53,7 @@ function Step1({ racks, totalStored, onNext }) {
           {preview.plan.map(p => (
             <div key={p.rack_code} style={{ backgroundColor: '#F9FAFB', borderRadius: '10px', padding: '14px 16px', marginBottom: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <div style={{ width: '24px', height: '24px', borderRadius: '50%', backgroundColor: '#0055FF', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 700 }}>{p.rack_code}</div>
+                <div style={{ width: '24px', height: '24px', borderRadius: '8px', backgroundColor: '#0055FF', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 700 }}>{p.rack_code}</div>
                 <span style={{ fontSize: '14px', fontWeight: 600, color: '#111827' }}>{p.rack_code}구역</span>
               </div>
               <span style={{ fontSize: '14px', fontWeight: 600, color: '#0055FF' }}>{p.bag_count}자루</span>
@@ -110,14 +92,61 @@ export default function ProcessingPage() {
   }
 
   return (
-    <DashboardLayout onLogout={handleLogout}>
-      <div style={{ backgroundColor: '#fff', borderBottom: '1px solid #F3F4F6', padding: '14px 24px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-        <img src={side4} width="22" height="22" style={{ filter: activeFilter }} />
-        <span style={{ fontSize: '15px', fontWeight: 600, color: '#111827' }}>공정 투입</span>
+    <DashboardLayout onLogout={handleLogout} bgColor="#F0F3FA">
+      <div style={{
+        backgroundColor: '#fff',
+        padding: '16px 28px',
+        display: 'flex',
+        alignItems: 'center',
+        position: 'sticky',
+        top: 0,
+        zIndex: 10,
+        justifyContent: 'space-between',
+        borderBottom: '1px solid #DDE2EF'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <img src={side4} width="22" height="22" style={{ filter: activeFilter }} />
+          <span style={{ fontSize: '20px', fontWeight: 600, color: '#111827' }}>
+            공정 투입
+          </span>
+        </div>
       </div>
-      <div style={{ padding: '20px 24px' }}>
-        {loading ? <div style={{ textAlign: 'center', padding: '48px', color: '#9CA3AF' }}>불러오는 중...</div> :
-          <Step1 racks={racks} totalStored={totalStored} onNext={handleSubmit} />}
+
+      {/* 요약 카드 - 구역별 적재 현황 */}
+      <div style={{ padding: '28px 28px 0' }}>
+        <p style={{ margin: '0 0 16px', fontSize: '18px', fontWeight: 600, color: '#111827' }}>전체 <span style={{ fontSize: '32px' }}>{totalStored}</span>자루 보관 중</p>
+        {loading ? (
+          <div style={{ display: 'flex', gap: '16px' }}>
+            {[1, 2, 3, 4].map(i => <div key={i} style={{ flex: 1, height: '120px', backgroundColor: '#fff', borderRadius: '16px', boxShadow: '0 1px 8px rgba(0,0,0,0.06)' }} />)}
+          </div>
+        ) : (
+          <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
+            {racks.map(rack => {
+              const pct = Math.min((rack.current_count / rack.max_capacity) * 100, 100)
+              return (
+                <div key={rack.rack_code} style={{ flex: '1 1 0', backgroundColor: '#fff', borderRadius: '16px', boxShadow: '0 1px 8px rgba(0,0,0,0.06)', padding: '20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div>
+                      <p style={{ margin: 0, fontSize: '20px', fontWeight: 600, color: '#111827' }}>{rack.rack_code}구역</p>
+                      <p style={{ margin: 0, fontSize: '16px', color: '#9CA3AF' }}>{rack.current_count}/{rack.max_capacity}자루 적재 중</p>
+                    </div>
+                  </div>
+                  <div style={{ height: '10px', backgroundColor: '#E5E7EB', borderRadius: '5px', overflow: 'hidden' }}>
+                    <div style={{ height: '100%', width: `${pct}%`, backgroundColor: '#0055FF', borderRadius: '5px' }} />
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* 공정 투입 입력 */}
+      <div style={{ marginTop: '40px', backgroundColor: '#fff', minHeight: '100vh', borderTopLeftRadius: '30px', borderTopRightRadius: '30px', overflow: 'hidden', boxShadow: '0 -6px 15px rgba(59, 130, 246, 0.10)' }}>
+        <div style={{ padding: '20px 24px' }}>
+          {loading ? <div style={{ textAlign: 'center', padding: '48px', color: '#9CA3AF' }}>불러오는 중...</div> :
+            <Step1 onNext={handleSubmit} />}
+        </div>
       </div>
 
       {success && (

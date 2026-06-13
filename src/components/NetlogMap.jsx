@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import * as THREE from 'three'
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
 import './NetlogMap.css'
+import GuideOverlay from './GuideOverlay'
 
 function useAnimatedProgress(active, duration = 2500) {
   const [progress, setProgress] = useState(0)
@@ -247,6 +248,7 @@ export default function NetlogMap() {
   const canvasRef = useRef(null)
   const [minrakVisible,  setMinrakVisible]  = useState(false)
   const [summaryVisible, setSummaryVisible] = useState(false)
+  const [showGuide, setShowGuide] = useState(true)
 
   // 원본 JS 코드와 동일한 변수들을 ref로 노출
   const yoActionRef        = useRef(null)
@@ -410,13 +412,13 @@ export default function NetlogMap() {
       updateCameraView()
     }
 
-    const onMouseDown = (e) => { if (e.target.closest('.ui-panel,.calendar-dropdown')) return; isDragging=true; previousPointer={x:e.clientX,y:e.clientY}; clickStartPos={x:e.clientX,y:e.clientY} }
+    const onMouseDown = (e) => { if (e.target.closest('.ui-panel,.calendar-dropdown,.guide-overlay')) return; isDragging=true; previousPointer={x:e.clientX,y:e.clientY}; clickStartPos={x:e.clientX,y:e.clientY} }
     const onMouseMove = (e) => { if (!isDragging) return; applyPanDelta(e.clientX-previousPointer.x, e.clientY-previousPointer.y); previousPointer={x:e.clientX,y:e.clientY} }
-    const onMouseUp   = (e) => { isDragging=false; if (e.target.closest('.ui-panel,.calendar-dropdown')) return; if (Math.hypot(e.clientX-clickStartPos.x, e.clientY-clickStartPos.y)<5) checkIntersection(e.clientX, e.clientY) }
-    const onWheel     = (e) => { if (e.target.closest('.ui-panel')) return; zoomLevel=THREE.MathUtils.clamp(zoomLevel-e.deltaY*0.002, 1, MAX_ZOOM); updateCameraView() }
-    const onTouchStart = (e) => { if (e.target.closest('.ui-panel')) return; if (e.touches.length===1){isDragging=true;previousPointer={x:e.touches[0].clientX,y:e.touches[0].clientY};clickStartPos={x:e.touches[0].clientX,y:e.touches[0].clientY}}else if(e.touches.length===2){isDragging=false;previousPinchDistance=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY)} }
-    const onTouchMove  = (e) => { if (e.target.closest('.ui-panel')) return; e.preventDefault(); if(isDragging&&e.touches.length===1){applyPanDelta(e.touches[0].clientX-previousPointer.x,e.touches[0].clientY-previousPointer.y);previousPointer={x:e.touches[0].clientX,y:e.touches[0].clientY}}else if(e.touches.length===2&&previousPinchDistance){const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);zoomLevel=THREE.MathUtils.clamp(zoomLevel+(d-previousPinchDistance)*0.01,1,MAX_ZOOM);updateCameraView();previousPinchDistance=d} }
-    const onTouchEnd   = (e) => { isDragging=false; previousPinchDistance=null; if(e.target.closest('.ui-panel'))return; if(e.cancelable)e.preventDefault(); if(e.changedTouches.length===1){const t=e.changedTouches[0];if(Math.hypot(t.clientX-clickStartPos.x,t.clientY-clickStartPos.y)<15)checkIntersection(t.clientX,t.clientY)} }
+    const onMouseUp   = (e) => { isDragging=false; if (e.target.closest('.ui-panel,.calendar-dropdown,.guide-overlay')) return; if (Math.hypot(e.clientX-clickStartPos.x, e.clientY-clickStartPos.y)<5) checkIntersection(e.clientX, e.clientY) }
+    const onWheel     = (e) => { if (e.target.closest('.ui-panel,.guide-overlay')) return; zoomLevel=THREE.MathUtils.clamp(zoomLevel-e.deltaY*0.002, 1, MAX_ZOOM); updateCameraView() }
+    const onTouchStart = (e) => { if (e.target.closest('.ui-panel,.guide-overlay')) return; if (e.touches.length===1){isDragging=true;previousPointer={x:e.touches[0].clientX,y:e.touches[0].clientY};clickStartPos={x:e.touches[0].clientX,y:e.touches[0].clientY}}else if(e.touches.length===2){isDragging=false;previousPinchDistance=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY)} }
+    const onTouchMove  = (e) => { if (e.target.closest('.ui-panel,.guide-overlay')) return; e.preventDefault(); if(isDragging&&e.touches.length===1){applyPanDelta(e.touches[0].clientX-previousPointer.x,e.touches[0].clientY-previousPointer.y);previousPointer={x:e.touches[0].clientX,y:e.touches[0].clientY}}else if(e.touches.length===2&&previousPinchDistance){const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);zoomLevel=THREE.MathUtils.clamp(zoomLevel+(d-previousPinchDistance)*0.01,1,MAX_ZOOM);updateCameraView();previousPinchDistance=d} }
+    const onTouchEnd   = (e) => { isDragging=false; previousPinchDistance=null; if(e.target.closest('.ui-panel,.guide-overlay'))return; if(e.cancelable)e.preventDefault(); if(e.changedTouches.length===1){const t=e.changedTouches[0];if(Math.hypot(t.clientX-clickStartPos.x,t.clientY-clickStartPos.y)<15)checkIntersection(t.clientX,t.clientY)} }
 
     window.addEventListener('mousedown', onMouseDown)
     window.addEventListener('mousemove', onMouseMove)
@@ -428,7 +430,7 @@ export default function NetlogMap() {
     window.addEventListener('touchend',   onTouchEnd,   {passive:false})
     window.addEventListener('resize',     calculateBaseBounds)
 
-    new GLTFLoader().load('/models/netlog_nla_netspa_text.glb', (gltf) => {
+    new GLTFLoader().load('/models/netlog_nla_netspa222222.glb', (gltf) => {
       scene.add(gltf.scene)
       gltf.scene.traverse((child) => {
         if (child.isMesh && child.material) {
@@ -510,10 +512,11 @@ export default function NetlogMap() {
   }, [])
 
   return (
-    <div style={{width:'100vw',height:'100vh',overflow:'hidden',position:'fixed',top:0,left:0,backgroundColor:'#fff'}}>
-      <canvas ref={canvasRef} id="webgl-canvas"/>
-      <MinrakPanel  visible={minrakVisible}  onClose={() => setMinrakVisible(false)}/>
-      <SummaryPanel visible={summaryVisible} onClose={handleSummaryClose}/>
-    </div>
+    <div style={{width:'100vw',height:'100dvh',overflow:'hidden',position:'fixed',top:0,left:0,backgroundColor:'#fff'}}>
+    <canvas ref={canvasRef} id="webgl-canvas"/>
+    {showGuide && <GuideOverlay onDismiss={() => setShowGuide(false)}/>}
+    <MinrakPanel  visible={minrakVisible}  onClose={() => setMinrakVisible(false)}/>
+    <SummaryPanel visible={summaryVisible} onClose={handleSummaryClose}/>
+  </div>
   )
 }

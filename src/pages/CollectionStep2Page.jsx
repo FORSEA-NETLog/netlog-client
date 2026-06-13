@@ -123,7 +123,7 @@ if (loading) return <DashboardLayout onLogout={handleLogout}><div style={{ paddi
 const RACK_CODES = ['A', 'B', 'C', 'D']
 
 return (
-  <div style={{ minHeight: '100vh', backgroundColor: '#F9FAFB', display: 'flex', flexDirection: 'column' }}>
+  <DashboardLayout onLogout={handleLogout} bgColor="#F9FAFB">
 
     {/* 임시저장 복원 토스트 */}
     {draftRestored && (
@@ -145,8 +145,11 @@ return (
       padding: '16px 28px',
       display: 'flex',
       alignItems: 'center',
+      position: 'sticky',
+      top: 0,
+      zIndex: 10,
       justifyContent: 'space-between',
-      borderBottom: '1px solid #E4E8F0'
+      borderBottom: '1px solid #DDE2EF'
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
         <img src={side3} width="22" height="22" style={{ filter: activeFilter }} />
@@ -216,7 +219,7 @@ return (
       {error && <p style={{ color: '#EF4444', fontSize: '13px', textAlign: 'center', padding: '12px', backgroundColor: '#FEF2F2', borderRadius: '8px', marginBottom: '16px' }}>{error}</p>}
     </div>
 
-    <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, backgroundColor: '#fff', borderTop: '1px solid #F3F4F6', padding: '16px 32px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', zIndex: 10 }}>
+    <div style={{ position: 'fixed', bottom: 0, left: window.innerWidth >= 768 ? '56px' : 0, right: 0, backgroundColor: '#fff', borderTop: '1px solid #F3F4F6', padding: '16px 32px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', zIndex: 10 }}>
       <button onClick={() => navigate(-1)} style={{ padding: '12px 24px', borderRadius: '10px', border: '1px solid #E5E7EB', backgroundColor: '#fff', fontSize: '14px', color: '#6B7280', cursor: 'pointer' }}>← 이전</button>
       <span style={{ fontSize: '14px', fontWeight: 600, color: '#111827' }}>총 {totalAll}자루 적재</span>
       <div style={{ display: 'flex', gap: '10px' }}>
@@ -228,6 +231,6 @@ return (
         </button>
       </div>
     </div>
-  </div>
+  </DashboardLayout>
 )
 }

@@ -67,7 +67,7 @@ export default function CollectionStep1Page() {
             if (draft.siteWeights) setSiteWeights(draft.siteWeights)
             setDraftRestored(true)
             setTimeout(() => setDraftRestored(false), 3000)
-          } catch (e) {
+          } catch {
             // 파싱 실패 시 무시
           }
         } else {
@@ -106,32 +106,11 @@ export default function CollectionStep1Page() {
     finally { setSubmitting(false) }
   }
 
-  const handleSaveDraft = async () => {
-    const hasAnyInput = transferPerson || vehicleNumber || Object.values(siteWeights).some(v => v)
-    setError('')
-    setSubmitting(true)
-    try {
-      if (hasAnyInput && transferPerson && vehicleNumber) {
-        // 운반 정보가 모두 있을 때만 API 저장 (API 필수값 충족)
-        const sites = record.sites.map(s => ({
-          detail_id: s.detail_id,
-          weight_kg: parseFloat(siteWeights[s.detail_id]) || 0
-        }))
-        await axiosInstance.patch(`/dashboard/collection-records/${collectionId}/info`, {
-          transfer_person_name: transferPerson,
-          vehicle_number: vehicleNumber,
-          sites
-        })
-      }
-      // 어느 스텝에서 임시저장했는지 기록
-      localStorage.setItem(DRAFT_STEP_KEY, '1')
-      navigate('/dashboard/collections')
-    } catch (e) {
-      setError('임시저장에 실패했습니다. 다시 시도해주세요')
-      console.error(e)
-    } finally {
-      setSubmitting(false)
-    }
+  const handleSaveDraft = () => {
+    // transferPerson/vehicleNumber/siteWeights는 이미 자동저장되므로 localStorage 데이터는 유지
+    // 임시저장 스텝 마크만 갱신
+    localStorage.setItem(DRAFT_STEP_KEY, '1')
+    navigate('/dashboard/collections')
   }
 
   if (loading) return <DashboardLayout onLogout={handleLogout}><div style={{ padding: '48px', textAlign: 'center', color: '#9CA3AF' }}>불러오는 중...</div></DashboardLayout>
@@ -140,7 +119,7 @@ export default function CollectionStep1Page() {
   const labelStyle = { fontSize: '13px', color: '#6B7280', marginBottom: '6px', display: 'block' }
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#F9FAFB', display: 'flex', flexDirection: 'column' }}>
+    <DashboardLayout onLogout={handleLogout} bgColor="#F9FAFB">
 
       {/* 임시저장 복원 토스트 */}
       {draftRestored && (
@@ -158,11 +137,22 @@ export default function CollectionStep1Page() {
 
       {/* 헤더 */}
       <div style={{
-        backgroundColor: '#fff', borderBottom: '1px solid #F3F4F6',
-        padding: '14px 24px', display: 'flex', alignItems: 'center', gap: '8px'
+        backgroundColor: '#fff',
+        padding: '16px 28px',
+        display: 'flex',
+        alignItems: 'center',
+        position: 'sticky',
+        top: 0,
+        zIndex: 10,
+        justifyContent: 'space-between',
+        borderBottom: '1px solid #DDE2EF'
       }}>
-        <span style={{ fontSize: '16px' }}>📍</span>
-        <span style={{ fontSize: '15px', fontWeight: 600, color: '#111827' }}>수거 정보 입력</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <img src={side3} width="22" height="22" style={{ filter: activeFilter }} />
+          <span style={{ fontSize: '20px', fontWeight: 600, color: '#111827' }}>
+            수거 정보 입력
+          </span>
+        </div>
       </div>
 
       <div style={{ maxWidth: '720px', width: '100%', margin: '0 auto', padding: '0 24px 120px' }}>
@@ -218,7 +208,7 @@ export default function CollectionStep1Page() {
         {error && <p style={{ color: '#EF4444', fontSize: '13px', textAlign: 'center', marginBottom: '16px' }}>{error}</p>}
       </div>
 
-      <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, backgroundColor: '#fff', borderTop: '1px solid #F3F4F6', padding: '16px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', zIndex: 10 }}>
+      <div style={{ position: 'fixed', bottom: 0, left: window.innerWidth >= 768 ? '56px' : 0, right: 0, backgroundColor: '#fff', borderTop: '1px solid #F3F4F6', padding: '16px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', zIndex: 10 }}>
         <button onClick={() => navigate(-1)} style={{ padding: '12px 20px', borderRadius: '10px', border: '1px solid #E5E7EB', backgroundColor: '#fff', fontSize: '14px', color: '#6B7280', cursor: 'pointer' }}>← 이전</button>
         <span style={{ fontSize: '13px', color: '#9CA3AF' }}>{completedCount} / 3 입력완료</span>
         <div style={{ display: 'flex', gap: '10px' }}>
@@ -230,6 +220,6 @@ export default function CollectionStep1Page() {
           </button>
         </div>
       </div>
-    </div>
+    </DashboardLayout>
   )
 }

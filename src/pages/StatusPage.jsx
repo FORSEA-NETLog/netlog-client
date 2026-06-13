@@ -11,7 +11,7 @@ function StatusBadge({ status }) {
     completed: { label: '완료', color: '#10B981', bg: '#ECFDF5' },
   }
   const s = map[status] || { label: status, color: '#6B7280', bg: '#F3F4F6' }
-  return <span style={{ fontSize: '12px', fontWeight: 600, color: s.color, backgroundColor: s.bg, padding: '3px 10px', borderRadius: '6px' }}>{s.label}</span>
+  return <span style={{ fontSize: '12px', fontWeight: 600, color: s.color, backgroundColor: s.bg, padding: '6px 4px', borderRadius: '999px', textAlign: 'center', display: 'block' }}>{s.label}</span>
 }
 
 export default function StatusPage() {
@@ -55,9 +55,23 @@ export default function StatusPage() {
 
   return (
     <DashboardLayout onLogout={handleLogout}>
-      <div style={{ backgroundColor: '#fff', borderBottom: '1px solid #F3F4F6', padding: '14px 24px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-        <img src={side5} width="22" height="22" style={{ filter: activeFilter }} />
-        <span style={{ fontSize: '15px', fontWeight: 600, color: '#111827' }}>공정 현황</span>
+      <div style={{
+        backgroundColor: '#fff',
+        padding: '16px 28px',
+        display: 'flex',
+        alignItems: 'center',
+        position: 'sticky',
+        top: 0,
+        zIndex: 10,
+        justifyContent: 'space-between',
+        borderBottom: '1px solid #DDE2EF'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <img src={side5} width="22" height="22" style={{ filter: activeFilter }} />
+          <span style={{ fontSize: '20px', fontWeight: 600, color: '#111827' }}>
+            공정 현황
+          </span>
+        </div>
       </div>
 
       <div style={{ padding: '20px 24px', display: 'grid', gridTemplateColumns: selectedBundle ? '1fr 1fr' : '1fr', gap: '20px' }}>

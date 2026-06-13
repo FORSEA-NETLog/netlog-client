@@ -3,7 +3,9 @@ import { useNavigate, useParams } from 'react-router-dom'
 import axiosInstance from '../api/axiosInstance'
 import DashboardLayout from '../components/DashboardLayout'
 import side3 from '../assets/side3.svg'
+import check_icon from '../assets/check_icon.svg'
 import { activeFilter } from '../components/DashboardLayout'
+
 
 function Stepper({ current }) {
   const steps = ['수거 정보', '보관 장소', '수거 완료']
@@ -83,38 +85,41 @@ export default function CollectionStep3Page() {
         padding: '16px 28px',
         display: 'flex',
         alignItems: 'center',
+        position: 'sticky',
+        top: 0,
+        zIndex: 10,
         justifyContent: 'space-between',
-        borderBottom: '1px solid #E4E8F0'
-        }}>
+        borderBottom: '1px solid #DDE2EF'
+      }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <img src={side3} width="22" height="22" style={{ filter: activeFilter }} />
-            <span style={{ fontSize: '20px', fontWeight: 600, color: '#111827' }}>
+          <img src={side3} width="22" height="22" style={{ filter: activeFilter }} />
+          <span style={{ fontSize: '20px', fontWeight: 600, color: '#111827' }}>
             수거 정보 입력
-            </span>
+          </span>
         </div>
       </div>
 
       <div style={{ maxWidth: '720px', width: '100%', margin: '0 auto', padding: '0 24px 120px' }}>
         <Stepper current={3} />
 
-        <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-          <div style={{ fontSize: '48px', marginBottom: '16px' }}>✅</div>
+        <div style={{ textAlign: 'center', marginTop: '24px', marginBottom: '32px' }}>
+          <img src={check_icon} alt="" width="48" height="48" style={{ display: 'block', margin: '0 auto 16px' }} />
           <h2 style={{ margin: 0, fontSize: '22px', fontWeight: 700, color: '#111827' }}>수거 정보 확인 및 등록</h2>
           <p style={{ margin: '8px 0 0', fontSize: '14px', color: '#9CA3AF' }}>아래 내용을 확인하고 수거를 완료하세요.</p>
         </div>
 
-        <div style={{ backgroundColor: '#EFF6FF', borderRadius: '16px', border: '1px solid #BFDBFE', padding: '0 24px' }}>
-          <div style={rowStyle}><span style={{ fontSize: '14px', color: '#6B7280' }}>집하장</span><span style={{ fontSize: '14px', fontWeight: 600, color: '#111827' }}>{siteName}</span></div>
-          <div style={rowStyle}><span style={{ fontSize: '14px', color: '#6B7280' }}>총 자루 수</span><span style={{ fontSize: '14px', fontWeight: 600, color: '#111827' }}>{totalBags}자루</span></div>
-          <div style={rowStyle}><span style={{ fontSize: '14px', color: '#6B7280' }}>계근 무게</span><span style={{ fontSize: '14px', fontWeight: 600, color: '#111827' }}>{totalWeight ? `${totalWeight} kg` : '-'}</span></div>
-          <div style={rowStyle}><span style={{ fontSize: '14px', color: '#6B7280' }}>구역 별 보관</span><span style={{ fontSize: '14px', fontWeight: 600, color: '#111827', textAlign: 'right', maxWidth: '60%' }}>{rackSummary}</span></div>
-          <div style={{ ...rowStyle, borderBottom: 'none' }}><span style={{ fontSize: '14px', color: '#6B7280' }}>일시</span><span style={{ fontSize: '14px', fontWeight: 600, color: '#111827' }}>{collectedAt}</span></div>
+        <div style={{ backgroundColor: '#0055FF1A', borderRadius: '16px', padding: '0 32px', width: 'calc(100% + 32px)', marginLeft: '-16px', boxSizing: 'border-box' }}>
+          <div style={rowStyle}><span style={{ fontSize: '14px', color: '#6B7280' }}>집하장</span><span style={{ fontSize: '15px', fontWeight: 600, color: '#111827' }}>{siteName}</span></div>
+          <div style={rowStyle}><span style={{ fontSize: '14px', color: '#6B7280' }}>총 자루 수</span><span style={{ fontSize: '15px', fontWeight: 600, color: '#111827' }}>{totalBags}자루</span></div>
+          <div style={rowStyle}><span style={{ fontSize: '14px', color: '#6B7280' }}>계근 무게</span><span style={{ fontSize: '15px', fontWeight: 600, color: '#111827' }}>{totalWeight ? `${totalWeight} kg` : '-'}</span></div>
+          <div style={rowStyle}><span style={{ fontSize: '14px', color: '#6B7280' }}>구역 별 보관</span><span style={{ fontSize: '15px', fontWeight: 600, color: '#111827', textAlign: 'right', maxWidth: '60%' }}>{rackSummary}</span></div>
+          <div style={{ ...rowStyle, borderBottom: 'none' }}><span style={{ fontSize: '14px', color: '#6B7280' }}>일시</span><span style={{ fontSize: '15px', fontWeight: 600, color: '#111827' }}>{collectedAt}</span></div>
         </div>
 
         {error && <p style={{ color: '#EF4444', fontSize: '13px', textAlign: 'center', marginTop: '16px', padding: '12px', backgroundColor: '#FEF2F2', borderRadius: '8px' }}>{error}</p>}
       </div>
 
-      <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, backgroundColor: '#fff', borderTop: '1px solid #F3F4F6', padding: '16px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', zIndex: 10 }}>
+      <div style={{ position: 'fixed', bottom: 0, left: window.innerWidth >= 768 ? '56px' : 0, right: 0, backgroundColor: '#fff', borderTop: '1px solid #F3F4F6', padding: '16px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', zIndex: 10 }}>
         <button onClick={() => navigate(-1)} style={{ padding: '12px 24px', borderRadius: '10px', border: '1px solid #E5E7EB', backgroundColor: '#fff', fontSize: '14px', color: '#6B7280', cursor: 'pointer' }}>← 이전</button>
         <button onClick={handleComplete} disabled={submitting} style={{ padding: '12px 28px', borderRadius: '10px', border: 'none', backgroundColor: '#0055FF', color: '#fff', fontSize: '14px', fontWeight: 600, cursor: submitting ? 'not-allowed' : 'pointer', opacity: submitting ? 0.7 : 1 }}>
           {submitting ? '처리 중...' : '수거 완료'}
