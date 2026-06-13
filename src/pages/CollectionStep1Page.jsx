@@ -32,10 +32,14 @@ function Stepper({ current }) {
 export default function CollectionStep1Page() {
   const navigate = useNavigate()
   const { collectionId } = useParams()
+
+  const DRAFT_KEY = `draft_step1_${collectionId}`
+  const DRAFT_STEP_KEY = `draft_step_${collectionId}`
   const [record, setRecord] = useState(null)
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
+  const [draftRestored, setDraftRestored] = useState(false)
   const [transferPerson, setTransferPerson] = useState(localStorage.getItem('manager_name') || '')
   const [vehicleNumber, setVehicleNumber] = useState('')
   const [siteWeights, setSiteWeights] = useState({})
@@ -52,11 +56,36 @@ export default function CollectionStep1Page() {
       .then(res => {
         const data = res.data.data
         setRecord(data)
-        const init = {}
-        data.sites.forEach(s => { init[s.detail_id] = s.weight_kg || '' })
-        setSiteWeights(init)
-      }).catch(console.error).finally(() => setLoading(false))
+
+        // 임시저장 복원 시도
+        const saved = localStorage.getItem(DRAFT_KEY)
+        if (saved) {
+          try {
+            const draft = JSON.parse(saved)
+            if (draft.transferPerson) setTransferPerson(draft.transferPerson)
+            if (draft.vehicleNumber) setVehicleNumber(draft.vehicleNumber)
+            if (draft.siteWeights) setSiteWeights(draft.siteWeights)
+            setDraftRestored(true)
+            setTimeout(() => setDraftRestored(false), 3000)
+          } catch (e) {
+            // 파싱 실패 시 무시
+          }
+        } else {
+          // 임시저장 없으면 서버값으로 초기화
+          const init = {}
+          data.sites.forEach(s => { init[s.detail_id] = s.weight_kg || '' })
+          setSiteWeights(init)
+        }
+      })
+      .catch(console.error)
+      .finally(() => setLoading(false))
   }, [collectionId])
+
+  // 입력값 변경 시 자동 임시저장
+  useEffect(() => {
+    if (loading) return
+    localStorage.setItem(DRAFT_KEY, JSON.stringify({ transferPerson, vehicleNumber, siteWeights }))
+  }, [transferPerson, vehicleNumber, siteWeights])
 
   const handleSubmit = async () => {
     if (!transferPerson || !vehicleNumber) { setError('운반 담당자와 차량 번호를 입력해주세요'); return }
@@ -69,9 +98,40 @@ export default function CollectionStep1Page() {
         vehicle_number: vehicleNumber,
         sites: record.sites.map(s => ({ detail_id: s.detail_id, weight_kg: parseFloat(siteWeights[s.detail_id]) }))
       })
+      // 정식 제출 성공 시 임시저장 관련 키 모두 삭제
+      localStorage.removeItem(DRAFT_KEY)
+      localStorage.removeItem(DRAFT_STEP_KEY)
       navigate(`/dashboard/collections/${collectionId}/step2`)
     } catch (e) { setError('저장에 실패했습니다. 다시 시도해주세요'); console.error(e) }
     finally { setSubmitting(false) }
+  }
+
+  const handleSaveDraft = async () => {
+    const hasAnyInput = transferPerson || vehicleNumber || Object.values(siteWeights).some(v => v)
+    setError('')
+    setSubmitting(true)
+    try {
+      if (hasAnyInput && transferPerson && vehicleNumber) {
+        // 운반 정보가 모두 있을 때만 API 저장 (API 필수값 충족)
+        const sites = record.sites.map(s => ({
+          detail_id: s.detail_id,
+          weight_kg: parseFloat(siteWeights[s.detail_id]) || 0
+        }))
+        await axiosInstance.patch(`/dashboard/collection-records/${collectionId}/info`, {
+          transfer_person_name: transferPerson,
+          vehicle_number: vehicleNumber,
+          sites
+        })
+      }
+      // 어느 스텝에서 임시저장했는지 기록
+      localStorage.setItem(DRAFT_STEP_KEY, '1')
+      navigate('/dashboard/collections')
+    } catch (e) {
+      setError('임시저장에 실패했습니다. 다시 시도해주세요')
+      console.error(e)
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   if (loading) return <DashboardLayout onLogout={handleLogout}><div style={{ padding: '48px', textAlign: 'center', color: '#9CA3AF' }}>불러오는 중...</div></DashboardLayout>
@@ -80,23 +140,30 @@ export default function CollectionStep1Page() {
   const labelStyle = { fontSize: '13px', color: '#6B7280', marginBottom: '6px', display: 'block' }
 
   return (
-    <DashboardLayout onLogout={handleLogout}>
-    {/* 헤더 */}
-    <div style={{
-    backgroundColor: '#fff',
-    padding: '16px 28px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    borderBottom: '1px solid #E4E8F0'
-    }}>
-    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-        <img src={side3} width="22" height="22" style={{ filter: activeFilter }} />
-        <span style={{ fontSize: '20px', fontWeight: 600, color: '#111827' }}>
-        수거 정보 입력
-        </span>
-    </div>
-    </div>
+    <div style={{ minHeight: '100vh', backgroundColor: '#F9FAFB', display: 'flex', flexDirection: 'column' }}>
+
+      {/* 임시저장 복원 토스트 */}
+      {draftRestored && (
+        <div style={{
+          position: 'fixed', top: '16px', left: '50%', transform: 'translateX(-50%)',
+          backgroundColor: '#1D4ED8', color: '#fff',
+          padding: '10px 20px', borderRadius: '10px',
+          fontSize: '13px', fontWeight: 600, zIndex: 100,
+          boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+          display: 'flex', alignItems: 'center', gap: '8px'
+        }}>
+          💾 이전에 입력하던 내용을 불러왔습니다
+        </div>
+      )}
+
+      {/* 헤더 */}
+      <div style={{
+        backgroundColor: '#fff', borderBottom: '1px solid #F3F4F6',
+        padding: '14px 24px', display: 'flex', alignItems: 'center', gap: '8px'
+      }}>
+        <span style={{ fontSize: '16px' }}>📍</span>
+        <span style={{ fontSize: '15px', fontWeight: 600, color: '#111827' }}>수거 정보 입력</span>
+      </div>
 
       <div style={{ maxWidth: '720px', width: '100%', margin: '0 auto', padding: '0 24px 120px' }}>
         <Stepper current={1} />
@@ -154,10 +221,15 @@ export default function CollectionStep1Page() {
       <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, backgroundColor: '#fff', borderTop: '1px solid #F3F4F6', padding: '16px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', zIndex: 10 }}>
         <button onClick={() => navigate(-1)} style={{ padding: '12px 20px', borderRadius: '10px', border: '1px solid #E5E7EB', backgroundColor: '#fff', fontSize: '14px', color: '#6B7280', cursor: 'pointer' }}>← 이전</button>
         <span style={{ fontSize: '13px', color: '#9CA3AF' }}>{completedCount} / 3 입력완료</span>
-        <button onClick={handleSubmit} disabled={submitting} style={{ padding: '12px 20px', borderRadius: '10px', border: 'none', backgroundColor: '#0055FF', color: '#fff', fontSize: '14px', fontWeight: 600, cursor: 'pointer' }}>
-          {submitting ? '저장 중...' : '보관 장소 입력 →'}
-        </button>
+        <div style={{ display: 'flex', gap: '10px' }}>
+          <button onClick={handleSaveDraft} disabled={submitting} style={{ padding: '12px 20px', borderRadius: '10px', border: '1.5px solid #6B7280', backgroundColor: '#fff', fontSize: '14px', color: '#6B7280', fontWeight: 600, cursor: 'pointer' }}>
+            {submitting ? '저장 중...' : '💾 임시저장'}
+          </button>
+          <button onClick={handleSubmit} disabled={submitting} style={{ padding: '12px 20px', borderRadius: '10px', border: 'none', backgroundColor: '#0055FF', color: '#fff', fontSize: '14px', fontWeight: 600, cursor: 'pointer' }}>
+            {submitting ? '저장 중...' : '보관 장소 입력 →'}
+          </button>
+        </div>
       </div>
-    </DashboardLayout>
+    </div>
   )
 }

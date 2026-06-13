@@ -49,7 +49,8 @@ export default function CollectionStep3Page() {
     setSubmitting(true)
     setError('')
     try {
-      await axiosInstance.patch(`/dashboard/collection-records/${collectionId}/status`, { status: 'completed' })
+      // stacking POST 이후 상태는 이미 stacking_pending
+      // stacking_pending → stacked 전환만 필요
       await axiosInstance.patch(`/dashboard/collection-records/${collectionId}/status`, { status: 'stacked' })
       navigate('/dashboard/collections')
     } catch (e) { setError('수거 완료 처리에 실패했습니다'); console.error(e) }

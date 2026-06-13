@@ -6,9 +6,9 @@ import side5 from '../assets/side5.svg'
 
 function StatusBadge({ status }) {
   const map = {
-    ready:       { label: '대기',   color: '#F59E0B', bg: '#FFFBEB' },
+    ready: { label: '대기', color: '#F59E0B', bg: '#FFFBEB' },
     in_progress: { label: '진행중', color: '#3B82F6', bg: '#EFF6FF' },
-    completed:   { label: '완료',   color: '#10B981', bg: '#ECFDF5' },
+    completed: { label: '완료', color: '#10B981', bg: '#ECFDF5' },
   }
   const s = map[status] || { label: status, color: '#6B7280', bg: '#F3F4F6' }
   return <span style={{ fontSize: '12px', fontWeight: 600, color: s.color, backgroundColor: s.bg, padding: '3px 10px', borderRadius: '6px' }}>{s.label}</span>
@@ -20,6 +20,7 @@ export default function StatusPage() {
   const [loading, setLoading] = useState(true)
   const [selectedBundle, setSelectedBundle] = useState(null)
   const [updating, setUpdating] = useState(false)
+  const [filterRacks, setFilterRacks] = useState([])
 
   const handleLogout = () => { localStorage.removeItem('admin_token'); navigate('/dashboard/login') }
 
@@ -45,6 +46,10 @@ export default function StatusPage() {
     finally { setUpdating(false) }
   }
 
+  const toggleRackFilter = (rack) => {
+    setFilterRacks(prev => prev.includes(rack) ? prev.filter(r => r !== rack) : [...prev, rack])
+  }
+
   const nextStatus = (s) => s === 'ready' ? 'in_progress' : s === 'in_progress' ? 'completed' : null
   const nextStatusLabel = (s) => s === 'ready' ? '공정 시작' : s === 'in_progress' ? '공정 완료' : null
 
@@ -57,21 +62,21 @@ export default function StatusPage() {
 
       <div style={{ padding: '20px 24px', display: 'grid', gridTemplateColumns: selectedBundle ? '1fr 1fr' : '1fr', gap: '20px' }}>
         <div style={{ backgroundColor: '#fff', borderRadius: '16px', border: '1px solid #F3F4F6', overflow: 'hidden' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 80px 80px 120px 80px', padding: '12px 20px', backgroundColor: '#F9FAFB', borderBottom: '1px solid #F3F4F6' }}>
-            {['공정 ID', '자루 수', '무게', '공정 투입일', '상태'].map(h => <span key={h} style={{ fontSize: '12px', color: '#9CA3AF', fontWeight: 500 }}>{h}</span>)}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 80px 80px 160px 80px', padding: '12px 20px', backgroundColor: '#F9FAFB', borderBottom: '1px solid #F3F4F6' }}>
+            {['공정 투입일', '자루 수', '무게', '공정 ID', '상태'].map(h => <span key={h} style={{ fontSize: '12px', color: '#9CA3AF', fontWeight: 500 }}>{h}</span>)}
           </div>
           {loading ? [...Array(3)].map((_, i) => <div key={i} style={{ height: '56px', borderBottom: '1px solid #F9FAFB' }} />) :
             bundles.length === 0 ? <div style={{ padding: '48px', textAlign: 'center', color: '#9CA3AF', fontSize: '14px' }}>공정 데이터가 없습니다.</div> :
-            bundles.map(bundle => (
-              <div key={bundle.bundle_id} onClick={() => setSelectedBundle(selectedBundle?.bundle_id === bundle.bundle_id ? null : bundle)}
-                style={{ display: 'grid', gridTemplateColumns: '1fr 80px 80px 120px 80px', padding: '14px 20px', borderBottom: '1px solid #F9FAFB', backgroundColor: selectedBundle?.bundle_id === bundle.bundle_id ? '#EFF6FF' : '#fff', cursor: 'pointer', alignItems: 'center' }}>
-                <span style={{ fontSize: '13px', fontWeight: 600, color: '#111827' }}>{bundle.bundle_id?.slice(0, 8).toUpperCase()}</span>
-                <span style={{ fontSize: '13px', color: '#111827' }}>{bundle.bag_count}자루</span>
-                <span style={{ fontSize: '13px', color: '#111827' }}>{(bundle.bag_count * 40).toLocaleString()}kg</span>
-                <span style={{ fontSize: '12px', color: '#6B7280' }}>{bundle.processed_at ? new Date(bundle.processed_at).toLocaleDateString('ko-KR') : '-'}</span>
-                <StatusBadge status={bundle.status} />
-              </div>
-            ))
+              bundles.map(bundle => (
+                <div key={bundle.bundle_id} onClick={() => setSelectedBundle(selectedBundle?.bundle_id === bundle.bundle_id ? null : bundle)}
+                  style={{ display: 'grid', gridTemplateColumns: '1fr 80px 80px 160px 80px', padding: '14px 20px', borderBottom: '1px solid #F9FAFB', backgroundColor: selectedBundle?.bundle_id === bundle.bundle_id ? '#EFF6FF' : '#fff', cursor: 'pointer', alignItems: 'center' }}>
+                  <span style={{ fontSize: '13px', fontWeight: 600, color: '#111827' }}>{bundle.processed_at ? new Date(bundle.processed_at).toLocaleString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }) : '-'}</span>
+                  <span style={{ fontSize: '13px', color: '#111827' }}>{bundle.bag_count}자루</span>
+                  <span style={{ fontSize: '13px', color: '#111827' }}>{(bundle.bag_count * 40).toLocaleString()}kg</span>
+                  <span style={{ fontSize: '12px', color: '#6B7280' }}>{bundle.bundle_id?.slice(0, 8).toUpperCase()}</span>
+                  <StatusBadge status={bundle.status} />
+                </div>
+              ))
           }
         </div>
 
@@ -113,22 +118,59 @@ export default function StatusPage() {
               </div>
             )}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-              <div><p style={{ margin: 0, fontSize: '12px', color: '#9CA3AF' }}>투입 시작일</p><p style={{ margin: '4px 0 0', fontSize: '13px', fontWeight: 600, color: '#111827' }}>{selectedBundle.processed_at ? new Date(selectedBundle.processed_at).toLocaleDateString('ko-KR') : '-'}</p></div>
-              <div><p style={{ margin: 0, fontSize: '12px', color: '#9CA3AF' }}>공정 완료일</p><p style={{ margin: '4px 0 0', fontSize: '13px', fontWeight: 600, color: '#111827' }}>{selectedBundle.status === 'completed' ? new Date().toLocaleDateString('ko-KR') : '-'}</p></div>
+              <div><p style={{ margin: 0, fontSize: '12px', color: '#9CA3AF' }}>투입 시작일</p><p style={{ margin: '4px 0 0', fontSize: '13px', fontWeight: 600, color: '#111827' }}>{selectedBundle.processed_at ? new Date(selectedBundle.processed_at).toLocaleString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }) : '-'}</p></div>
+              <div><p style={{ margin: 0, fontSize: '12px', color: '#9CA3AF' }}>공정 완료일</p><p style={{ margin: '4px 0 0', fontSize: '13px', fontWeight: 600, color: '#111827' }}>{selectedBundle.status === 'completed' ? new Date().toLocaleString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }) : '-'}</p></div>
             </div>
             <div>
-              <p style={{ margin: '0 0 8px', fontSize: '13px', fontWeight: 600, color: '#111827' }}>자루 개별 정보</p>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 80px 1fr', padding: '8px 0', borderBottom: '1px solid #F3F4F6' }}>
-                {['자루 ID', '렉', '집하장'].map(h => <span key={h} style={{ fontSize: '12px', color: '#9CA3AF' }}>{h}</span>)}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                <p style={{ margin: 0, fontSize: '13px', fontWeight: 600, color: '#111827' }}>자루 개별 정보</p>
+                {/* 렉 필터 버튼 */}
+                {(() => {
+                  const racks = [...new Set((selectedBundle.bags || []).map(b => b.rack_code).filter(Boolean))].sort()
+                  if (racks.length === 0) return null
+                  return (
+                    <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                      {racks.map(rack => (
+                        <button
+                          key={rack}
+                          onClick={() => toggleRackFilter(rack)}
+                          style={{
+                            padding: '3px 10px',
+                            borderRadius: '6px',
+                            fontSize: '12px',
+                            fontWeight: 600,
+                            cursor: 'pointer',
+                            border: `2px solid ${filterRacks.includes(rack) ? '#0055FF' : '#E5E7EB'}`,
+                            backgroundColor: filterRacks.includes(rack) ? '#EFF6FF' : '#fff',
+                            color: filterRacks.includes(rack) ? '#0055FF' : '#6B7280',
+                          }}
+                        >
+                          {rack}렉
+                        </button>
+                      ))}
+                    </div>
+                  )
+                })()}
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 50px 100px 120px 80px', gap: '8px', padding: '8px 0', borderBottom: '1px solid #F3F4F6' }}>
+                {['자루 ID', '렉', '집하장', '적재 일시', '수거 ID'].map(h => <span key={h} style={{ fontSize: '12px', color: '#9CA3AF' }}>{h}</span>)}
               </div>
               <div style={{ maxHeight: '200px', overflowY: 'auto' }}>
-                {(selectedBundle.bags || []).map(bag => (
-                  <div key={bag.bag_id} style={{ display: 'grid', gridTemplateColumns: '1fr 80px 1fr', padding: '8px 0', borderBottom: '1px solid #F9FAFB', alignItems: 'center' }}>
-                    <span style={{ fontSize: '12px', color: '#111827' }}>{bag.serial_number}</span>
-                    <span style={{ fontSize: '12px', color: '#6B7280' }}>{bag.rack_code}</span>
-                    <span style={{ fontSize: '12px', color: '#6B7280' }}>{bag.site_name}</span>
-                  </div>
-                ))}
+                {(selectedBundle.bags || []).filter(bag => filterRacks.length === 0 || filterRacks.includes(bag.rack_code)).map(bag => {
+                  const shortCollectionId = bag.collection_id ? bag.collection_id.slice(0, 8).toUpperCase() : '-'
+                  const dateStr = bag.stored_at ? new Date(bag.stored_at).toLocaleString('ko-KR', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false }) : '-'
+                  return (
+                    <div key={bag.bag_id} style={{ display: 'grid', gridTemplateColumns: '1.2fr 50px 100px 120px 80px', gap: '8px', padding: '8px 0', borderBottom: '1px solid #F9FAFB', alignItems: 'center' }}>
+                      <span style={{ fontSize: '11px', color: '#111827' }}>{bag.serial_number}</span>
+                      <span style={{ fontSize: '11px', color: '#6B7280' }}>{bag.rack_code}</span>
+                      <span style={{ fontSize: '11px', color: '#6B7280' }}>{bag.site_name}</span>
+                      <span style={{ fontSize: '11px', color: '#6B7280' }}>{dateStr}</span>
+                      <span style={{ fontSize: '11px', color: '#4B5563' }} title={bag.collection_id}>
+                        {shortCollectionId}
+                      </span>
+                    </div>
+                  )
+                })}
               </div>
             </div>
             {nextStatus(selectedBundle.status) && (
@@ -141,7 +183,7 @@ export default function StatusPage() {
         ) : (
           <div style={{ backgroundColor: '#fff', borderRadius: '16px', border: '1px solid #F3F4F6', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '300px', gap: '8px' }}>
             <span style={{ fontSize: '32px' }}>⚙️</span>
-            <p style={{ color: '#9CA3AF', fontSize: '14px', textAlign: 'center' }}>공정 ID를 클릭하면<br/>상세 정보가 표시됩니다.</p>
+            <p style={{ color: '#9CA3AF', fontSize: '14px', textAlign: 'center' }}>공정 ID를 클릭하면<br />상세 정보가 표시됩니다.</p>
           </div>
         )}
       </div>
