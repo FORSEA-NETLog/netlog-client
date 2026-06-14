@@ -1,31 +1,34 @@
 // GuideOverlay.jsx — 지도 진입 시 인터랙션 가이드
 import { useState, useEffect } from 'react'
+import panelIcon from '../assets/panel.png'
+import facIcon from '../assets/fac.png'
+import siteIcon from '../assets/site.png'
 
 const BUBBLES = [
   {
     id: 'summary',
-    // 상단 중앙 — LOG THE NET 버튼 근처
-    top: '18%', left: '45%',
-    text: '버튼을 눌러\n수치 패널을 확인하세요',
-    icon: '📊',
+    // 상단 중앙 — LOG THE NET 버튼 근처 (iPhone 14 Pro: 393x852 기준)
+    top: '153px', left: '192px',
+    text: '버튼을 눌러\n 수거에 대한 수치 패널을\n 확인하세요',
+    icon: panelIcon,
     arrowDir: 'left', // 말풍선 꼬리 방향
   },
   {
     id: 'factory',
     // 좌측 하단 — 집(공장) 근처
-    top: '77%', left: '35%',
+    top: '714px', left: '156px',
     text: '건물을 눌러\n공정 애니메이션을 확인하세요',
-    icon: '🏭',
+    icon: facIcon,
     arrowDir: 'left',
   },
   {
     id: 'site2',
     // 중앙 하단 집하장들
-    top: '47%', left: '70%',
+    top: '438px', left: '292px',
     text: '각 집하장에서\n수거 현황을 볼 수 있어요',
-    icon: '🗺️',
+    icon: siteIcon,
     arrowDir: 'right',
-    maxWidth: '170px',
+    width: '170px',
   },
 ]
 
@@ -79,12 +82,12 @@ function Bubble({ bubble, index }) {
         borderRadius: '14px',
         padding: '10px 14px',
         boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
-        maxWidth: bubble.maxWidth || '140px',
+        width: bubble.width || '170px',
       }}>
-        <div style={{ fontSize: '18px', marginBottom: '4px' }}>{bubble.icon}</div>
+        <img src={bubble.icon} alt="" width="28" height="28" style={{ display: 'block', marginBottom: '4px' }} />
         <p style={{
           margin: 0,
-          fontSize: '11.5px',
+          fontSize: '12px',
           fontWeight: 600,
           color: '#0F2D4A',
           lineHeight: '1.5',
@@ -128,7 +131,7 @@ export default function GuideOverlay({ onDismiss }) {
         onClick={handleClose}
         style={{
           position: 'absolute',
-          top: '60px', right: '20px',
+          top: '48px', right: '20px',
           width: '40px', height: '40px',
           background: 'transparent',
           border: 'none',
@@ -146,18 +149,16 @@ export default function GuideOverlay({ onDismiss }) {
       </button>
 
       {/* 하단 안내 텍스트 */}
-      <div style={{
+      <div className="guide-bottom-hint" style={{
         position: 'absolute',
         bottom: '32px', left: '50%',
         transform: 'translateX(-50%)',
-        background: '#214288',
-        borderRadius: '20px',
-        padding: '10px 20px',
         fontSize: '13px', fontWeight: 600, color: '#fff',
         whiteSpace: 'nowrap',
-        boxShadow: '0 2px 12px rgba(0,0,0,0.12)',
+        letterSpacing: '0.2px',
         fontFamily: "'Pretendard', 'Inter', sans-serif",
       }}>
+        <span className="guide-bottom-hint__icon">👆</span>
         지도를 드래그하거나 확대·축소할 수 있어요!
       </div>
     </div>
