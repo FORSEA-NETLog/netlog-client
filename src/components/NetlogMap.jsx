@@ -1,9 +1,20 @@
-import { useEffect, useRef, useState, useCallback } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import * as THREE from 'three'
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
 import './NetlogMap.css'
 import GuideOverlay from './GuideOverlay'
+import dadaepoImg from '../assets/dadaepo.png'
+import minrakImg from '../assets/minrak.png'
+import idongImg from '../assets/idong.png'
+import jeongjaImg from '../assets/jeongja.png'
 import { fetchMapSites, fetchSiteStats, fetchMapSummary } from '../api/mapApi'
+
+const SITES = {
+  dadaepo: { name: '다대포항', image: dadaepoImg, siteCode: 'DADAEPO' },
+  minrak:  { name: '민락항',   image: minrakImg,  siteCode: 'MINRAK'  },
+  idong:   { name: '이동항',   image: idongImg,   siteCode: 'GIJANG'  },
+  jeongja: { name: '정자항',   image: jeongjaImg, siteCode: 'JEONGJA' },
+}
 
 function useAnimatedProgress(active, target, duration = 2500) {
   const [progress, setProgress] = useState(0)
@@ -125,7 +136,7 @@ function fmtKoDate(dateStr) {
 
 function SummaryPanel({ visible, onClose }) {
   const [startDate, setStartDate] = useState(new Date(2026, 4, 6))
-  const [endDate, setEndDate] = useState(new Date(2026, 5, 6))
+  const [endDate, setEndDate] = useState(() => new Date())
 
   // 서버에서 받아온 실제 수거량과 마지막 수거일
   const [totalWeight, setTotalWeight] = useState(0)
@@ -231,7 +242,7 @@ function SummaryPanel({ visible, onClose }) {
 }
 
 // 집하장 패널 (마커 클릭 시 표시)
-function SitePanel({ visible, onClose, siteId }) {
+function SitePanel({ visible, onClose, site, siteId }) {
   const [stats, setStats] = useState(null)
   const [loading, setLoading] = useState(false)
 
@@ -245,17 +256,16 @@ function SitePanel({ visible, onClose, siteId }) {
       .finally(() => setLoading(false))
   }, [visible, siteId])
 
-  const siteName = stats?.name ?? '집하장'
   const totalWeightKg = stats?.total_weight_kg ?? 0
   const lastCollected = stats?.last_collected_date ?? null
   const co2 = Math.round(totalWeightKg * 2.72)
   const charge = Math.round(totalWeightKg * 360)
 
   return (
-    <div id="ui-panel-minrak" className={`ui-panel${visible ? '' : ' hidden'}`}>
+    <div id="ui-panel-site" className={`ui-panel${visible ? '' : ' hidden'}`}>
       <div className="panel-header">
-        <img src="https://placehold.co/350x140" alt={siteName} />
-        <div className="badge-port">{siteName}</div>
+        <img src={site?.image} alt={site?.name} />
+        <div className="badge-port">{site?.name ?? '집하장'}</div>
       </div>
       <div className="panel-body">
         <div className="stat-card">
@@ -290,19 +300,11 @@ function SitePanel({ visible, onClose, siteId }) {
   )
 }
 
-// 3D 오브젝트 그룹 → site_code 매핑
-// 실제 3D 모델의 오브젝트명과 집하장 site_code를 연결
-const OBJ_TO_SITE_CODE = {
-  storT: 'MINRAK',
-  a2T: 'JEONGJA',
-  a1T: 'BUSAN_PORT',
-  a3T: 'GIJANG',
-}
-
 export default function NetlogMap() {
   const canvasRef = useRef(null)
-  const [siteVisible, setSiteVisible] = useState(false)
+  const [activeSite, setActiveSite] = useState('dadaepo')
   const [activeSiteId, setActiveSiteId] = useState(null)
+  const [siteVisible, setSiteVisible] = useState(false)
   const [summaryVisible, setSummaryVisible] = useState(false)
   const [showGuide, setShowGuide] = useState(true)
   const [bubbleAnchors, setBubbleAnchors] = useState({})
@@ -338,18 +340,13 @@ export default function NetlogMap() {
     setSummaryVisible(false)
   }
 
-  // siteCode에 해당하는 site_id로 SitePanel 열기
-  const openSitePanel = useCallback((siteCode) => {
-    const siteId = siteMapRef.current[siteCode]
-    if (siteId) {
-      setActiveSiteId(siteId)
-      setSiteVisible(true)
-    } else {
-      // 매핑 없으면 패널 없이 열기 (graceful fallback)
-      setActiveSiteId(null)
-      setSiteVisible(true)
-    }
-  }, [])
+  const openSitePanelRef = useRef(null)
+  openSitePanelRef.current = (siteKey) => {
+    const siteCode = SITES[siteKey]?.siteCode
+    setActiveSite(siteKey)
+    setActiveSiteId(siteCode ? (siteMapRef.current[siteCode] ?? null) : null)
+    setSiteVisible(true)
+  }
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -467,7 +464,7 @@ export default function NetlogMap() {
       else if (storT.includes(hit.object.name)) {
         storageAction?.reset().play()
         triggerLight('lightpath_3')
-        uiTimeout = setTimeout(() => openSitePanel(OBJ_TO_SITE_CODE.storT), 1200)
+        uiTimeout = setTimeout(() => openSitePanelRef.current('minrak'), 1200)
       }
       else if (cubeT.includes(hit.object.name)) {
         setSiteVisible(false)
@@ -483,17 +480,17 @@ export default function NetlogMap() {
       else if (a2T.includes(hit.object.name)) {
         armature002Action?.reset().play()
         triggerLight('lightpath_1')
-        uiTimeout = setTimeout(() => openSitePanel(OBJ_TO_SITE_CODE.a2T), 1200)
+        uiTimeout = setTimeout(() => openSitePanelRef.current('jeongja'), 1200)
       }
       else if (a1T.includes(hit.object.name)) {
         armature001Action?.reset().play()
         triggerLight('lightpath_4')
-        uiTimeout = setTimeout(() => openSitePanel(OBJ_TO_SITE_CODE.a1T), 1200)
+        uiTimeout = setTimeout(() => openSitePanelRef.current('dadaepo'), 1200)
       }
       else if (a3T.includes(hit.object.name)) {
         armature003Action?.reset().play()
         triggerLight('lightpath_2')
-        uiTimeout = setTimeout(() => openSitePanel(OBJ_TO_SITE_CODE.a3T), 1200)
+        uiTimeout = setTimeout(() => openSitePanelRef.current('idong'), 1200)
       }
     }
 
@@ -604,13 +601,13 @@ export default function NetlogMap() {
       window.removeEventListener('resize', calculateBaseBounds)
       renderer.dispose()
     }
-  }, [openSitePanel])
+  }, [])
 
   return (
     <div className="netlog-map-root">
       <canvas ref={canvasRef} id="webgl-canvas" />
       {showGuide && <GuideOverlay onDismiss={() => setShowGuide(false)} anchors={bubbleAnchors} />}
-      <SitePanel visible={siteVisible} onClose={() => setSiteVisible(false)} siteId={activeSiteId} />
+      <SitePanel site={SITES[activeSite]} siteId={activeSiteId} visible={siteVisible} onClose={() => setSiteVisible(false)} />
       <SummaryPanel visible={summaryVisible} onClose={handleSummaryClose} />
     </div>
   )
