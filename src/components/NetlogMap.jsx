@@ -439,10 +439,12 @@ export default function NetlogMap() {
 
     function checkIntersection(cx, cy) {
       if (!camera || !mixer) return
-      pointer.x = (cx / canvas.clientWidth) * 2 - 1
-      pointer.y = -(cy / canvas.clientHeight) * 2 + 1
+      const rect = canvas.getBoundingClientRect()
+      pointer.x = ((cx - rect.left) / rect.width) * 2 - 1
+      pointer.y = -((cy - rect.top) / rect.height) * 2 + 1
       raycaster.setFromCamera(pointer, camera)
       const hits = raycaster.intersectObjects(scene.children, true)
+      console.log('[click] hits:', hits.slice(0, 6).map(i => i.object.name))
       if (!hits.length) return
 
       const shipT = ['Cylinder025', 'Cylinder025_1', 'Cylinder_025', 'Cylinder_025_1']
@@ -452,7 +454,6 @@ export default function NetlogMap() {
       const a2T = ['Cube039_1', 'Cube039_2', 'Cube039']
       const a3T = ['Cube041_2', 'storage007', 'Cube041_1']
 
-      console.log('[click] top hits:', hits.slice(0, 5).map(i => i.object.name))
       const hit = hits.find(i => [...shipT, ...storT, ...cubeT, ...a1T, ...a2T, ...a3T].includes(i.object.name))
       if (!hit) return
 
