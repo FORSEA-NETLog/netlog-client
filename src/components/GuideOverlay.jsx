@@ -21,10 +21,10 @@ const BUBBLES = [
     id: 'factory',
     anchorKey: 'a4T',
     top: '714px', left: '156px',
-    offset: { x: 95, y: 0 },
+    offset: { x: 0, y: 0 },
     text: '건물을 눌러\n공정 애니메이션을 확인하세요',
     icon: facIcon,
-    arrowDir: 'left',
+    arrowDir: 'down', // 말풍선은 위쪽, 꼬리는 아래로 건물을 가리킴
   },
   {
     id: 'site3',
@@ -60,6 +60,16 @@ const arrowStyles = {
       borderRight: '10px solid rgba(255,255,255,0.55)',
     }
   },
+  down: {
+    // 말풍선 좌측 하단에서 아래로 향하는 꼬리
+    after: {
+      position: 'absolute', bottom: '-10px', left: '24px',
+      width: 0, height: 0,
+      borderLeft: '8px solid transparent',
+      borderRight: '8px solid transparent',
+      borderTop: '10px solid rgba(255,255,255,0.55)',
+    }
+  },
 }
 
 function Bubble({ bubble, index, anchor }) {
@@ -74,12 +84,17 @@ function Bubble({ bubble, index, anchor }) {
   const top  = anchor ? `${anchor.y + (bubble.offset?.y || 0)}px` : bubble.top
   const left = anchor ? `${anchor.x + (bubble.offset?.x || 0)}px` : bubble.left
 
+  // 'down': 말풍선은 앵커 위쪽에 위치, 좌하단 꼬리 끝(left:24px + 꼬리 폭 절반 8px)이 앵커를 정확히 가리키도록 이동
+  const wrapperTransform = bubble.arrowDir === 'down'
+    ? 'translate(-32px, calc(-100% - 10px))'
+    : 'translate(-50%, -50%)'
+
   return (
     <div style={{
       position: 'absolute',
       top,
       left,
-      transform: 'translate(-50%, -50%)',
+      transform: wrapperTransform,
       opacity: visible ? 1 : 0,
       transition: 'opacity 0.4s ease, transform 0.4s ease',
       zIndex: 20,
