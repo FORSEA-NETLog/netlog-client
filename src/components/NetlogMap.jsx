@@ -331,11 +331,11 @@ export default function NetlogMap() {
       updateBubbleAnchors()
     }
 
-    // 가이드 말풍선이 따라다닐 3D 오브젝트 (raycast 타겟 그룹과 동일)
+    // 가이드 말풍선 앵커
     const ANCHOR_GROUPS = {
-      summary: ['Cube011_3'],
-      factory: ['Cube043_1','Cube043_3','Cube043_2'],
-      site2:   ['Cube041_2','storage007','Cube041_1'],
+      cubeT: ['Cube011_3'],
+      a4T:   ['Cube043_1','Cube043_3','Cube043_2'],
+      site3T: ['Cube039_1','Cube039_2'], // site3 말풍선 앵커 (a2T 그룹 중 시각적 박스에 해당하는 메쉬만)
     }
     const anchorWorldPositions = {}
 
@@ -351,11 +351,11 @@ export default function NetlogMap() {
 
     function updateBubbleAnchors() {
       if (!camera || !showGuideRef.current) return
-      setBubbleAnchors({
-        summary: projectToScreen(anchorWorldPositions.summary),
-        factory: projectToScreen(anchorWorldPositions.factory),
-        site2:   projectToScreen(anchorWorldPositions.site2),
+      const result = {}
+      Object.keys(anchorWorldPositions).forEach(key => {
+        result[key] = projectToScreen(anchorWorldPositions[key])
       })
+      setBubbleAnchors(result)
     }
 
     function calculateBaseBounds() {
@@ -463,6 +463,7 @@ export default function NetlogMap() {
 
     new GLTFLoader().load('/models/netlog_nla_netspa222222.glb', (gltf) => {
       scene.add(gltf.scene)
+
       gltf.scene.traverse((child) => {
         if (child.isMesh && child.material) {
           const mats = Array.isArray(child.material) ? child.material : [child.material]

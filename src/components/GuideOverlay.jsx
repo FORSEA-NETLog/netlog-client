@@ -7,26 +7,30 @@ import siteIcon from '../assets/site.png'
 const BUBBLES = [
   {
     id: 'summary',
+    anchorKey: 'cubeT', // 어떤 raycast 그룹을 앵커로 쓸지
     // 앵커 계산 전 임시 위치 (iPhone 14 Pro: 393x852 기준)
     top: '153px', left: '192px',
-    // 앵커(3D 오브젝트 화면 좌표) 기준 오프셋
-    offset: { x: 95, y: -30 },
+    // 앵커(3D 오브젝트 화면 좌표) 기준 오프셋 — 꼬리 끝이 앵커를 정확히 가리키도록 계산
+    // width 170px → 절반 85 + 꼬리 길이 10 = 95
+    offset: { x: 95, y: 0 },
     text: '버튼을 눌러\n 수거에 대한 수치 패널을\n 확인하세요',
     icon: panelIcon,
     arrowDir: 'left', // 말풍선 꼬리 방향
   },
   {
     id: 'factory',
+    anchorKey: 'a4T',
     top: '714px', left: '156px',
-    offset: { x: 95, y: -50 },
+    offset: { x: 95, y: 0 },
     text: '건물을 눌러\n공정 애니메이션을 확인하세요',
     icon: facIcon,
     arrowDir: 'left',
   },
   {
-    id: 'site2',
+    id: 'site3',
+    anchorKey: 'site3T',
     top: '438px', left: '292px',
-    offset: { x: -100, y: -30 },
+    offset: { x: -95, y: 0 },
     text: '각 집하장에서\n수거 현황을 볼 수 있어요',
     icon: siteIcon,
     arrowDir: 'right',
@@ -130,7 +134,7 @@ export default function GuideOverlay({ onDismiss, anchors = {} }) {
       }} />
 
       {/* 말풍선들 */}
-      {BUBBLES.map((b, i) => <Bubble key={b.id} bubble={b} index={i} anchor={anchors[b.id]} />)}
+      {BUBBLES.map((b, i) => <Bubble key={b.id} bubble={b} index={i} anchor={anchors[b.anchorKey]} />)}
 
       {/* X 닫기 버튼 */}
       <button
