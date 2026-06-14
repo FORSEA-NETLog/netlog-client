@@ -359,7 +359,7 @@ export default function NetlogMap() {
     }
 
     function calculateBaseBounds() {
-      const w=window.innerWidth, h=window.innerHeight, sa=w/h
+      const w=canvas.clientWidth, h=canvas.clientHeight, sa=w/h
       renderer.setSize(w, h)
       const bw=BLENDER_ORTHO_SCALE, bh=BLENDER_ORTHO_SCALE/TARGET_ASPECT
       if (sa>TARGET_ASPECT) { baseRenderWidth=bw; baseRenderHeight=bw/sa }
@@ -369,8 +369,8 @@ export default function NetlogMap() {
 
     function checkIntersection(cx, cy) {
       if (!camera || !mixer || isFacPlaying) return
-      pointer.x = (cx/window.innerWidth)*2-1
-      pointer.y = -(cy/window.innerHeight)*2+1
+      pointer.x = (cx/canvas.clientWidth)*2-1
+      pointer.y = -(cy/canvas.clientHeight)*2+1
       raycaster.setFromCamera(pointer, camera)
       const hits = raycaster.intersectObjects(scene.children, true)
       if (!hits.length) return
@@ -438,8 +438,8 @@ export default function NetlogMap() {
     }
 
     const applyPanDelta = (dx, dy) => {
-      panOffset.x -= (dx/window.innerWidth) * (baseRenderWidth/zoomLevel)
-      panOffset.y += (dy/window.innerHeight) * (baseRenderHeight/zoomLevel)
+      panOffset.x -= (dx/canvas.clientWidth) * (baseRenderWidth/zoomLevel)
+      panOffset.y += (dy/canvas.clientHeight) * (baseRenderHeight/zoomLevel)
       updateCameraView()
     }
 
@@ -554,7 +554,7 @@ export default function NetlogMap() {
   }, [])
 
   return (
-    <div style={{width:'100vw',height:'100vh',overflow:'hidden',position:'fixed',top:0,left:0,backgroundColor:'#fff'}}>
+    <div className="netlog-map-root">
     <canvas ref={canvasRef} id="webgl-canvas"/>
     {showGuide && <GuideOverlay onDismiss={() => setShowGuide(false)} anchors={bubbleAnchors}/>}
     <MinrakPanel  visible={minrakVisible}  onClose={() => setMinrakVisible(false)}/>
