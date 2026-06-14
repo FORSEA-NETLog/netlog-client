@@ -452,6 +452,7 @@ export default function NetlogMap() {
       const a2T = ['Cube039_1', 'Cube039_2', 'Cube039']
       const a3T = ['Cube041_2', 'storage007', 'Cube041_1']
 
+      console.log('[click] top hits:', hits.slice(0, 5).map(i => i.object.name))
       const hit = hits.find(i => [...shipT, ...storT, ...cubeT, ...a1T, ...a2T, ...a3T].includes(i.object.name))
       if (!hit) return
 
