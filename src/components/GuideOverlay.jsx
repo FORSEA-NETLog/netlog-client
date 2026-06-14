@@ -7,24 +7,26 @@ import siteIcon from '../assets/site.png'
 const BUBBLES = [
   {
     id: 'summary',
-    // 상단 중앙 — LOG THE NET 버튼 근처 (iPhone 14 Pro: 393x852 기준)
+    // 앵커 계산 전 임시 위치 (iPhone 14 Pro: 393x852 기준)
     top: '153px', left: '192px',
+    // 앵커(3D 오브젝트 화면 좌표) 기준 오프셋
+    offset: { x: 95, y: -30 },
     text: '버튼을 눌러\n 수거에 대한 수치 패널을\n 확인하세요',
     icon: panelIcon,
     arrowDir: 'left', // 말풍선 꼬리 방향
   },
   {
     id: 'factory',
-    // 좌측 하단 — 집(공장) 근처
     top: '714px', left: '156px',
+    offset: { x: 95, y: -50 },
     text: '건물을 눌러\n공정 애니메이션을 확인하세요',
     icon: facIcon,
     arrowDir: 'left',
   },
   {
     id: 'site2',
-    // 중앙 하단 집하장들
     top: '438px', left: '292px',
+    offset: { x: -100, y: -30 },
     text: '각 집하장에서\n수거 현황을 볼 수 있어요',
     icon: siteIcon,
     arrowDir: 'right',
@@ -56,7 +58,7 @@ const arrowStyles = {
   },
 }
 
-function Bubble({ bubble, index }) {
+function Bubble({ bubble, index, anchor }) {
   const [visible, setVisible] = useState(false)
 
   useEffect(() => {
@@ -64,11 +66,15 @@ function Bubble({ bubble, index }) {
     return () => clearTimeout(t)
   }, [index])
 
+  // 3D 오브젝트 앵커가 계산되면 그 화면 좌표 + 오프셋을 사용, 아니면 임시 위치 사용
+  const top  = anchor ? `${anchor.y + (bubble.offset?.y || 0)}px` : bubble.top
+  const left = anchor ? `${anchor.x + (bubble.offset?.x || 0)}px` : bubble.left
+
   return (
     <div style={{
       position: 'absolute',
-      top: bubble.top,
-      left: bubble.left,
+      top,
+      left,
       transform: 'translate(-50%, -50%)',
       opacity: visible ? 1 : 0,
       transition: 'opacity 0.4s ease, transform 0.4s ease',
@@ -101,7 +107,7 @@ function Bubble({ bubble, index }) {
   )
 }
 
-export default function GuideOverlay({ onDismiss }) {
+export default function GuideOverlay({ onDismiss, anchors = {} }) {
   const [closing, setClosing] = useState(false)
 
   const handleClose = () => {
@@ -124,7 +130,7 @@ export default function GuideOverlay({ onDismiss }) {
       }} />
 
       {/* 말풍선들 */}
-      {BUBBLES.map((b, i) => <Bubble key={b.id} bubble={b} index={i} />)}
+      {BUBBLES.map((b, i) => <Bubble key={b.id} bubble={b} index={i} anchor={anchors[b.id]} />)}
 
       {/* X 닫기 버튼 */}
       <button

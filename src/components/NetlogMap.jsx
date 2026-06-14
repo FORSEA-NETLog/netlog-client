@@ -249,6 +249,9 @@ export default function NetlogMap() {
   const [minrakVisible,  setMinrakVisible]  = useState(false)
   const [summaryVisible, setSummaryVisible] = useState(false)
   const [showGuide, setShowGuide] = useState(true)
+  const [bubbleAnchors, setBubbleAnchors] = useState({})
+  const showGuideRef = useRef(true)
+  useEffect(() => { showGuideRef.current = showGuide }, [showGuide])
 
   // 원본 JS 코드와 동일한 변수들을 ref로 노출
   const yoActionRef        = useRef(null)
@@ -325,6 +328,34 @@ export default function NetlogMap() {
       camera.left=-zw/2+panOffset.x; camera.right=zw/2+panOffset.x
       camera.top=zh/2+panOffset.y; camera.bottom=-zh/2+panOffset.y
       camera.updateProjectionMatrix()
+      updateBubbleAnchors()
+    }
+
+    // 가이드 말풍선이 따라다닐 3D 오브젝트 (raycast 타겟 그룹과 동일)
+    const ANCHOR_GROUPS = {
+      summary: ['Cube011_3'],
+      factory: ['Cube043_1','Cube043_3','Cube043_2'],
+      site2:   ['Cube041_2','storage007','Cube041_1'],
+    }
+    const anchorWorldPositions = {}
+
+    function projectToScreen(worldPos) {
+      if (!camera || !worldPos) return null
+      const v = worldPos.clone().project(camera)
+      const rect = canvas.getBoundingClientRect()
+      return {
+        x: rect.left + (v.x * 0.5 + 0.5) * rect.width,
+        y: rect.top + (-v.y * 0.5 + 0.5) * rect.height,
+      }
+    }
+
+    function updateBubbleAnchors() {
+      if (!camera || !showGuideRef.current) return
+      setBubbleAnchors({
+        summary: projectToScreen(anchorWorldPositions.summary),
+        factory: projectToScreen(anchorWorldPositions.factory),
+        site2:   projectToScreen(anchorWorldPositions.site2),
+      })
     }
 
     function calculateBaseBounds() {
@@ -480,6 +511,16 @@ export default function NetlogMap() {
       textAction            = loadClip('text')
 
       camera.updateMatrixWorld()
+      gltf.scene.updateMatrixWorld(true)
+      Object.entries(ANCHOR_GROUPS).forEach(([key, names]) => {
+        const box = new THREE.Box3()
+        let found = false
+        names.forEach(n => {
+          const obj = scene.getObjectByName(n)
+          if (obj) { box.expandByObject(obj); found = true }
+        })
+        if (found) anchorWorldPositions[key] = box.getCenter(new THREE.Vector3())
+      })
       calculateBaseBounds()
     })
 
@@ -514,7 +555,7 @@ export default function NetlogMap() {
   return (
     <div style={{width:'100vw',height:'100dvh',overflow:'hidden',position:'fixed',top:0,left:0,backgroundColor:'#fff'}}>
     <canvas ref={canvasRef} id="webgl-canvas"/>
-    {showGuide && <GuideOverlay onDismiss={() => setShowGuide(false)}/>}
+    {showGuide && <GuideOverlay onDismiss={() => setShowGuide(false)} anchors={bubbleAnchors}/>}
     <MinrakPanel  visible={minrakVisible}  onClose={() => setMinrakVisible(false)}/>
     <SummaryPanel visible={summaryVisible} onClose={handleSummaryClose}/>
   </div>
