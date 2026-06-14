@@ -326,6 +326,7 @@ export default function NetlogMap() {
   }, [])
 
   const yoActionRef = useRef(null)
+  const cube43ActionRef = useRef(null)
   const isYoForwardRef = useRef(true)
   const isColorToggledRef = useRef(false)
 
@@ -335,6 +336,9 @@ export default function NetlogMap() {
       yoActionRef.current.timeScale = -1
       yoActionRef.current.play()
       isYoForwardRef.current = true
+    }
+    if (cube43ActionRef.current && !cube43ActionRef.current.isRunning()) {
+      cube43ActionRef.current.reset().play()
     }
     isColorToggledRef.current = false
     setSummaryVisible(false)
@@ -360,8 +364,10 @@ export default function NetlogMap() {
     let camera, mixer
     const clock = new THREE.Clock()
     let shipAction, storageAction
-    let armature001Action, armature002Action, armature003Action
-    let uiTimeout = null, summaryTimeout = null
+    let armature001Action, armature002Action, armature003Action, armature004Action
+    let facAction, textAction
+    let facTimeout = null, uiTimeout = null, summaryTimeout = null
+    let isFacPlaying = false
     let zoomLevel = 1, panOffset = { x: 0, y: 0 }, baseRenderWidth = 0, baseRenderHeight = 0
 
     const emissionColors = [
@@ -405,6 +411,7 @@ export default function NetlogMap() {
 
     const ANCHOR_GROUPS = {
       cubeT: ['Cube011_3'],
+      a4T: ['Cube043_1', 'Cube043_3', 'Cube043_2'],
       site3T: ['Cube039_1', 'Cube039_2'],
     }
     const anchorWorldPositions = {}
@@ -438,7 +445,7 @@ export default function NetlogMap() {
     }
 
     function checkIntersection(cx, cy) {
-      if (!camera || !mixer) return
+      if (!camera || !mixer || isFacPlaying) return
       const rect = canvas.getBoundingClientRect()
       pointer.x = ((cx - rect.left) / rect.width) * 2 - 1
       pointer.y = -((cy - rect.top) / rect.height) * 2 + 1
@@ -453,8 +460,9 @@ export default function NetlogMap() {
       const a1T = ['storage003', 'Cube008_1', 'Cube008']
       const a2T = ['Cube039_1', 'Cube039_2', 'Cube039']
       const a3T = ['Cube041_2', 'storage007', 'Cube041_1']
+      const a4T = ['Cube043_1', 'Cube043_3', 'Cube043_2']
 
-      const hit = hits.find(i => [...shipT, ...storT, ...cubeT, ...a1T, ...a2T, ...a3T].includes(i.object.name))
+      const hit = hits.find(i => [...shipT, ...storT, ...cubeT, ...a1T, ...a2T, ...a3T, ...a4T].includes(i.object.name))
       if (!hit) return
 
       if (uiTimeout) clearTimeout(uiTimeout)
@@ -471,6 +479,7 @@ export default function NetlogMap() {
       else if (cubeT.includes(hit.object.name)) {
         setSiteVisible(false)
         setSummaryVisible(false)
+        if (cube43ActionRef.current && !cube43ActionRef.current.isRunning()) cube43ActionRef.current.reset().play()
         if (yoActionRef.current) {
           yoActionRef.current.paused = false
           yoActionRef.current.timeScale = isYoForwardRef.current ? 1 : -1
@@ -493,6 +502,17 @@ export default function NetlogMap() {
         armature003Action?.reset().play()
         triggerLight('lightpath_2')
         uiTimeout = setTimeout(() => openSitePanelRef.current('idong'), 1200)
+      }
+      else if (a4T.includes(hit.object.name)) {
+        armature004Action?.reset().play()
+        if (facAction) {
+          if (facTimeout) clearTimeout(facTimeout)
+          facTimeout = setTimeout(() => {
+            isFacPlaying = true
+            facAction.reset().play()
+            textAction?.reset().play()
+          }, 1000)
+        }
       }
     }
 
@@ -544,6 +564,7 @@ export default function NetlogMap() {
         if (e.action === yoActionRef.current && yoActionRef.current.timeScale > 0) {
           summaryTimeout = setTimeout(() => setSummaryVisible(true), 150)
         }
+        if (e.action === facAction) isFacPlaying = false
       })
 
       const BLENDER_FPS = 24
@@ -559,10 +580,14 @@ export default function NetlogMap() {
 
       shipAction = loadClip('Empty.002Action', ['ship_action_1_60', 1, 130])
       storageAction = loadClip('ArmatureAction')
+      cube43ActionRef.current = loadClip('Cube.043Action')
       yoActionRef.current = loadClip('yo')
       armature002Action = loadClip('ArmatureAction.002')
       armature001Action = loadClip('ArmatureAction.001')
       armature003Action = loadClip('ArmatureAction.003')
+      armature004Action = loadClip('ArmatureAction.004')
+      facAction = loadClip('fac')
+      textAction = loadClip('text')
 
       camera.updateMatrixWorld()
       gltf.scene.updateMatrixWorld(true)
@@ -592,7 +617,7 @@ export default function NetlogMap() {
 
     return () => {
       cancelAnimationFrame(animFrameId)
-        ;[uiTimeout, summaryTimeout].forEach(t => t && clearTimeout(t))
+        ;[facTimeout, uiTimeout, summaryTimeout].forEach(t => t && clearTimeout(t))
       window.removeEventListener('mousedown', onMouseDown)
       window.removeEventListener('mousemove', onMouseMove)
       window.removeEventListener('mouseup', onMouseUp)
