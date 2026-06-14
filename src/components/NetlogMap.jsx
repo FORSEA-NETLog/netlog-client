@@ -3,6 +3,17 @@ import * as THREE from 'three'
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
 import './NetlogMap.css'
 import GuideOverlay from './GuideOverlay'
+import dadaepoImg from '../assets/dadaepo.png'
+import minrakImg from '../assets/minrak.png'
+import idongImg from '../assets/idong.png'
+import jeongjaImg from '../assets/jeongja.png'
+
+const SITES = {
+  dadaepo: { name: '다대포항', image: dadaepoImg },
+  minrak:  { name: '민락항',   image: minrakImg },
+  idong:   { name: '이동항',   image: idongImg },
+  jeongja: { name: '정자항',   image: jeongjaImg },
+}
 
 function useAnimatedProgress(active, duration = 2500) {
   const [progress, setProgress] = useState(0)
@@ -204,12 +215,12 @@ function SummaryPanel({ visible, onClose }) {
   )
 }
 
-function MinrakPanel({ visible, onClose }) {
+function SitePanel({ site, visible, onClose }) {
   return (
-    <div id="ui-panel-minrak" className={`ui-panel${visible?'':' hidden'}`}>
+    <div id="ui-panel-site" className={`ui-panel${visible?'':' hidden'}`}>
       <div className="panel-header">
-        <img src="https://placehold.co/350x140" alt="민락항"/>
-        <div className="badge-port">민락항</div>
+        <img src={site.image} alt={site.name}/>
+        <div className="badge-port">{site.name}</div>
       </div>
       <div className="panel-body">
         <div className="stat-card">
@@ -246,7 +257,8 @@ function MinrakPanel({ visible, onClose }) {
 
 export default function NetlogMap() {
   const canvasRef = useRef(null)
-  const [minrakVisible,  setMinrakVisible]  = useState(false)
+  const [activeSite, setActiveSite] = useState('dadaepo')
+  const [siteVisible, setSiteVisible] = useState(false)
   const [summaryVisible, setSummaryVisible] = useState(false)
   const [showGuide, setShowGuide] = useState(true)
   const [bubbleAnchors, setBubbleAnchors] = useState({})
@@ -395,7 +407,7 @@ export default function NetlogMap() {
       else if (storT.includes(hit.object.name)) {
         storageAction?.reset().play()
         triggerLight('lightpath_3')
-        uiTimeout = setTimeout(() => setMinrakVisible(true), 1200)
+        uiTimeout = setTimeout(() => { setActiveSite('minrak'); setSiteVisible(true) }, 1200)
       }
       else if (cubeT.includes(hit.object.name)) {
         // 원본 JS와 동일: 패널 닫고 cube43 + yo 재생 + 색상 토글
@@ -412,17 +424,17 @@ export default function NetlogMap() {
       else if (a2T.includes(hit.object.name)) {
         armature002Action?.reset().play()
         triggerLight('lightpath_1')
-        uiTimeout = setTimeout(() => setMinrakVisible(true), 1200)
+        uiTimeout = setTimeout(() => { setActiveSite('jeongja'); setSiteVisible(true) }, 1200)
       }
       else if (a1T.includes(hit.object.name)) {
         armature001Action?.reset().play()
         triggerLight('lightpath_4')
-        uiTimeout = setTimeout(() => setMinrakVisible(true), 1200)
+        uiTimeout = setTimeout(() => { setActiveSite('dadaepo'); setSiteVisible(true) }, 1200)
       }
       else if (a3T.includes(hit.object.name)) {
         armature003Action?.reset().play()
         triggerLight('lightpath_2')
-        uiTimeout = setTimeout(() => setMinrakVisible(true), 1200)
+        uiTimeout = setTimeout(() => { setActiveSite('idong'); setSiteVisible(true) }, 1200)
       }
       else if (a4T.includes(hit.object.name)) {
         armature004Action?.reset().play()
@@ -557,7 +569,7 @@ export default function NetlogMap() {
     <div className="netlog-map-root">
     <canvas ref={canvasRef} id="webgl-canvas"/>
     {showGuide && <GuideOverlay onDismiss={() => setShowGuide(false)} anchors={bubbleAnchors}/>}
-    <MinrakPanel  visible={minrakVisible}  onClose={() => setMinrakVisible(false)}/>
+    <SitePanel site={SITES[activeSite]} visible={siteVisible} onClose={() => setSiteVisible(false)}/>
     <SummaryPanel visible={summaryVisible} onClose={handleSummaryClose}/>
   </div>
   )
